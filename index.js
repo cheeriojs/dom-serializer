@@ -1,8 +1,7 @@
 /*
   Module dependencies
 */
-var _ = require('lodash');
-var utils = require('./utils');
+var ElementType = require('domelementtype');
 var entities = require('entities');
 
 /*
@@ -94,22 +93,23 @@ var render = module.exports = function(dom, opts) {
   var output = '',
       xmlMode = opts.xmlMode;
 
-  _.each(dom, function(elem) {
-    var isTag = utils.isTag(elem.type);
+  for(var i = 0; i < dom.length; i++){
+    var elem = dom[i];
+    var isTag = ElementType.isTag(elem.type);
 
     var pushVal;
     if (isTag)
       pushVal = renderTag(elem, xmlMode);
-    else if (elem.type === 'directive')
+    else if (elem.type === ElementType.Directive)
       pushVal = renderDirective(elem);
-    else if (elem.type === 'comment')
+    else if (elem.type === ElementType.Comment)
       pushVal = renderComment(elem);
-    else if (elem.type === 'cdata')
+    else if (elem.type === ElementType.CDATA)
       pushVal = renderCdata(elem);
     else
       pushVal = renderText(elem);
 
-    if (elem.children && elem.type !== 'cdata')
+    if (elem.children && elem.type !== ElementType.CDATA)
       pushVal += render(elem.children, opts);
 
     if (isTag && (!singleTag[elem.name] || xmlMode)) {
@@ -120,7 +120,7 @@ var render = module.exports = function(dom, opts) {
 
     // Push rendered DOM node
     output += pushVal;
-  });
+  }
 
   return output;
 };
