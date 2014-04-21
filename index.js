@@ -95,7 +95,7 @@ var render = module.exports = function(dom, opts) {
 
   for(var i = 0; i < dom.length; i++){
     var elem = dom[i];
-    var isTag = ElementType.isTag(elem.type);
+    var isTag = ElementType.isTag(elem);
 
     var pushVal;
     if (isTag)
