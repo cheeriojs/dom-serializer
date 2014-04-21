@@ -125,11 +125,11 @@ var render = module.exports = function(dom, opts) {
   return output;
 };
 
-var isClosedTag = function(elem, xmlMode){
+function isClosedTag(elem, xmlMode){
   return (xmlMode && (!elem.children || elem.children.length === 0));
-};
+}
 
-var renderTag = function(elem, xmlMode) {
+function renderTag(elem, xmlMode) {
   var tag = '<' + elem.name,
       attribs = formatAttrs(elem.attribs);
 
@@ -142,22 +142,20 @@ var renderTag = function(elem, xmlMode) {
   }
 
   return tag + '>';
-};
+}
 
-var renderDirective = function(elem) {
+function renderDirective(elem) {
   return '<' + elem.data + '>';
-};
+}
 
-var renderText = function(elem) {
+function renderText(elem) {
   return entities.encodeXML(elem.data || '');
-};
+}
 
-var renderCdata = function(elem) {
+function renderCdata(elem) {
   return '<![CDATA[' + elem.children[0].data + ']]>';
-};
+}
 
-var renderComment = function(elem) {
+function renderComment(elem) {
   return '<!--' + elem.data + '-->';
-};
-
-// module.exports = $.extend(exports);
+}
