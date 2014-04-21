@@ -1,8 +1,8 @@
 var expect = require('expect.js'),
-    defaultOpts = require('..').prototype.options,
+    defaultOpts = require('cheerio').prototype.options,
     _ = require('lodash'),
-    parse = require('../lib/parse'),
-    render = require('../lib/render');
+    parse = require('cheerio/lib/parse'),
+    render = require('./index.js');
 
 var html = function(str, options) {
   options = _.defaults(options || {}, defaultOpts);
