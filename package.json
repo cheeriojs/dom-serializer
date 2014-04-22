@@ -1,5 +1,5 @@
 {
-  "name": "dom-renderer",
+  "name": "dom-serializer",
   "version": "0.0.0",
   "description": "render dom nodes to string",
   "author": "Felix Boehm <me@feedic.com>",
