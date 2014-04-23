@@ -90,14 +90,13 @@ var render = module.exports = function(dom, opts) {
   if (!Array.isArray(dom) && !dom.cheerio) dom = [dom];
   opts = opts || {};
 
-  var output = '',
-      xmlMode = opts.xmlMode;
+  var output = '';
 
   for(var i = 0; i < dom.length; i++){
     var elem = dom[i];
 
     if (ElementType.isTag(elem))
-      output += renderTag(elem, xmlMode);
+      output += renderTag(elem, opts);
     else if (elem.type === ElementType.Directive)
       output += renderDirective(elem);
     else if (elem.type === ElementType.Comment)
@@ -111,11 +110,11 @@ var render = module.exports = function(dom, opts) {
   return output;
 };
 
-function isClosedTag(elem, xmlMode){
+function isClosedTag(elem, opts){
   return (xmlMode && (!elem.children || elem.children.length === 0));
 }
 
-function renderTag(elem, xmlMode) {
+function renderTag(elem, opts) {
   var tag = '<' + elem.name,
       attribs = formatAttrs(elem.attribs);
 
@@ -123,19 +122,18 @@ function renderTag(elem, xmlMode) {
     tag += ' ' + attribs;
   }
 
-  if (isClosedTag(elem, xmlMode)) {
-    tag += '/';
-  }
-
-  tag += '>';
+  if (isClosedTag(elem, opts)) {
+    tag += '/>';
+  } else {
+    tag += '>';
+    tag += render(elem.children, opts);
   
-  tag += render(elem.children, opts);
-  
-  if (!singleTag[elem.name] || xmlMode) {
-    if (!isClosedTag(elem, xmlMode)) {
+    if (!singleTag[elem.name] || opts.xmlMode) {
       tag += '</' + elem.name + '>';
     }
   }
+
+  
   
   return tag;
 }
