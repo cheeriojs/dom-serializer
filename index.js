@@ -110,10 +110,6 @@ var render = module.exports = function(dom, opts) {
   return output;
 };
 
-function isClosedTag(elem, opts){
-  return (xmlMode && (!elem.children || elem.children.length === 0));
-}
-
 function renderTag(elem, opts) {
   var tag = '<' + elem.name,
       attribs = formatAttrs(elem.attribs);
@@ -122,7 +118,10 @@ function renderTag(elem, opts) {
     tag += ' ' + attribs;
   }
 
-  if (isClosedTag(elem, opts)) {
+  if (
+    opts.xmlMode &&
+    (!elem.children || elem.children.length === 0)
+  ) {
     tag += '/>';
   } else {
     tag += '>';
