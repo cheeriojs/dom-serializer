@@ -95,31 +95,17 @@ var render = module.exports = function(dom, opts) {
 
   for(var i = 0; i < dom.length; i++){
     var elem = dom[i];
-    var isTag = ElementType.isTag(elem);
 
-    var pushVal;
-    if (isTag)
-      pushVal = renderTag(elem, xmlMode);
+    if (ElementType.isTag(elem))
+      output += renderTag(elem, xmlMode);
     else if (elem.type === ElementType.Directive)
-      pushVal = renderDirective(elem);
+      output += renderDirective(elem);
     else if (elem.type === ElementType.Comment)
-      pushVal = renderComment(elem);
+      output += renderComment(elem);
     else if (elem.type === ElementType.CDATA)
-      pushVal = renderCdata(elem);
+      output += renderCdata(elem);
     else
-      pushVal = renderText(elem);
-
-    if (elem.children && elem.type !== ElementType.CDATA)
-      pushVal += render(elem.children, opts);
-
-    if (isTag && (!singleTag[elem.name] || xmlMode)) {
-      if (!isClosedTag(elem, xmlMode)) {
-        pushVal += '</' + elem.name + '>';
-      }
-    }
-
-    // Push rendered DOM node
-    output += pushVal;
+      output += renderText(elem);
   }
 
   return output;
@@ -141,7 +127,17 @@ function renderTag(elem, xmlMode) {
     tag += '/';
   }
 
-  return tag + '>';
+  tag += '>';
+  
+  tag += render(elem.children, opts);
+  
+  if (!singleTag[elem.name] || xmlMode) {
+    if (!isClosedTag(elem, xmlMode)) {
+      tag += '</' + elem.name + '>';
+    }
+  }
+  
+  return tag;
 }
 
 function renderDirective(elem) {
