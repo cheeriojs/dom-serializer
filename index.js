@@ -114,7 +114,7 @@ var render = module.exports = function(dom, opts) {
   for(var i = 0; i < dom.length; i++){
     var elem = dom[i];
 
-    if (elem.type === "root")
+    if (elem.type === 'root')
       output += render(elem.children, opts);
     else if (ElementType.isTag(elem))
       output += renderTag(elem, opts);
