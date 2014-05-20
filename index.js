@@ -9,21 +9,28 @@ var entities = require('entities');
 */
 var booleanAttributes = {
   __proto__: null,
+  allowfullscreen: true,
+  async: true,
   autofocus: true,
   autoplay: true,
-  async: true,
   checked: true,
   controls: true,
+  default: true,
   defer: true,
   disabled: true,
   hidden: true,
+  ismap: true,
   loop: true,
   multiple: true,
+  muted: true,
   open: true,
   readonly: true,
   required: true,
+  reversed: true,
   scoped: true,
-  selected: true
+  seamless: true,
+  selected: true,
+  typemustmatch: true
 };
 
 var unencodedElements = {
