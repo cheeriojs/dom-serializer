@@ -48,7 +48,7 @@ var unencodedElements = {
 /*
   Format attributes
 */
-var formatAttrs = function(attributes) {
+function formatAttrs(attributes) {
   if (!attributes) return;
 
   var output = '',
@@ -69,7 +69,7 @@ var formatAttrs = function(attributes) {
   }
 
   return output;
-};
+}
 
 /*
   Self-enclosing tags (stolen from node-htmlparser)
@@ -162,7 +162,7 @@ function renderDirective(elem) {
   return '<' + elem.data + '>';
 }
 
-var renderText = function(elem) {
+function renderText(elem) {
   var data      = elem.data || '';
       
   if (!(elem.parent && elem.parent.name in unencodedElements)) {
@@ -170,7 +170,7 @@ var renderText = function(elem) {
   }
   
   return data;
-};
+}
 
 function renderCdata(elem) {
   return '<![CDATA[' + elem.children[0].data + ']]>';
