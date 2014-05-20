@@ -154,8 +154,7 @@ function renderDirective(elem) {
 }
 
 var renderText = function(elem) {
-  var name, isMatch,
-      data      = elem.data || '',
+  var data      = elem.data || '',
       name      = elem.parent && elem.parent.name
       isEncoded = !(name in unencodedElements);
       
