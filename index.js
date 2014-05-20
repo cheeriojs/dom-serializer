@@ -114,7 +114,9 @@ var render = module.exports = function(dom, opts) {
   for(var i = 0; i < dom.length; i++){
     var elem = dom[i];
 
-    if (ElementType.isTag(elem))
+    if (elem.type === "root")
+      output += render(elem.children, opts);
+    else if (ElementType.isTag(elem))
       output += renderTag(elem, opts);
     else if (elem.type === ElementType.Directive)
       output += renderDirective(elem);
