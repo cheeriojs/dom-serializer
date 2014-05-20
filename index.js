@@ -26,6 +26,18 @@ var booleanAttributes = {
   selected: true
 };
 
+var unencodedElements = {
+  __proto__: null,
+  style: true,
+  script: true,
+  xmp: true,
+  iframe: true,
+  noembed: true,
+  noframes: true,
+  plaintext: true,
+  noscript: true
+}
+
 /*
   Format attributes
 */
@@ -143,20 +155,13 @@ function renderDirective(elem) {
 
 var renderText = function(elem) {
   var name, isMatch,
-      data    = elem.data,
-      reg     = 'style|script|xmp|iframe|noembed|noframes|plaintext|noscript',
-      parent  = elem.parent;
+      data      = elem.data || '',
+      name      = elem.parent && elem.parent.name
+      isEncoded = !(name in unencodedElements);
       
-  if (parent) {
-    name = parent.name;
-    
-    if (name) {
-        isMatch = name.match(new RegExp(reg));
-    }
+  if (isEncoded) {
+    data = entities.encodeXML(data);
   }
-  
-  if (!isMatch)
-    entities.encodeXML(data || '');
   
   return data;
 };
