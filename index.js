@@ -154,11 +154,9 @@ function renderDirective(elem) {
 }
 
 var renderText = function(elem) {
-  var data      = elem.data || '',
-      name      = elem.parent && elem.parent.name
-      isEncoded = !(name in unencodedElements);
+  var data      = elem.data || '';
       
-  if (isEncoded) {
+  if (!(elem.parent && elem.parent.name in unencodedElements)) {
     data = entities.encodeXML(data);
   }
   
