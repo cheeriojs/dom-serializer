@@ -66,11 +66,16 @@ describe('render', function() {
       expect(html(str)).to.equal('<div data-foo-bar-baz="value"></div>');
     });
     
+    it('should not encode characters in script tag', function() {
+      var str = '<script>alert("hello world")</script>';
+      expect(html(str)).to.equal(str);
+    });
+    
     it('should render CDATA correctly', function() {
       var str = '<a> <b> <![CDATA[ asdf&asdf ]]> <c/> <![CDATA[ asdf&asdf ]]> </b> </a>';
       expect(xml(str)).to.equal(str);
     });
-
+    
   });
 
 });
