@@ -36,7 +36,7 @@ var unencodedElements = {
   noframes: true,
   plaintext: true,
   noscript: true
-}
+};
 
 /*
   Format attributes
