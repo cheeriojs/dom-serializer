@@ -26,6 +26,18 @@ var booleanAttributes = {
   selected: true
 };
 
+var unencodedElements = {
+  __proto__: null,
+  style: true,
+  script: true,
+  xmp: true,
+  iframe: true,
+  noembed: true,
+  noframes: true,
+  plaintext: true,
+  noscript: true
+};
+
 /*
   Format attributes
 */
@@ -141,9 +153,17 @@ function renderDirective(elem) {
   return '<' + elem.data + '>';
 }
 
-function renderText(elem) {
-  return entities.encodeXML(elem.data || '');
-}
+var renderText = function(elem) {
+  var data      = elem.data || '',
+      name      = elem.parent && elem.parent.name
+      isEncoded = !(name in unencodedElements);
+      
+  if (isEncoded) {
+    data = entities.encodeXML(data);
+  }
+  
+  return data;
+};
 
 function renderCdata(elem) {
   return '<![CDATA[' + elem.children[0].data + ']]>';
