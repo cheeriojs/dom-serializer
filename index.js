@@ -141,9 +141,25 @@ function renderDirective(elem) {
   return '<' + elem.data + '>';
 }
 
-function renderText(elem) {
-  return entities.encodeXML(elem.data || '');
-}
+var renderText = function(elem) {
+  var name, isMatch,
+      data    = elem.data,
+      reg     = 'style|script|xmp|iframe|noembed|noframes|plaintext|noscript',
+      parent  = elem.parent;
+      
+  if (parent) {
+    name = parent.name;
+    
+    if (name) {
+        isMatch = name.match(new RegExp(reg));
+    }
+  }
+  
+  if (!isMatch)
+    entities.encodeXML(data || '');
+  
+  return data;
+};
 
 function renderCdata(elem) {
   return '<![CDATA[' + elem.children[0].data + ']]>';
