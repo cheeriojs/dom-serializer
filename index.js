@@ -119,13 +119,11 @@ var render = module.exports = function(dom, opts) {
     else if (ElementType.isTag(elem))
       output += renderTag(elem, opts);
     else if (elem.type === ElementType.Directive)
-      output += renderDirective(elem, opts);
+      output += renderDirective(elem);
     else if (elem.type === ElementType.Comment)
-      output += renderComment(elem, opts);
+      output += renderComment(elem);
     else if (elem.type === ElementType.CDATA)
-      output += renderCdata(elem, opts);
-    else if (elem.type === ElementType.Text && elem.parent && elem.parent.type === ElementType.Script)
-      output += renderScript(elem, opts);
+      output += renderCdata(elem);
     else
       output += renderText(elem, opts);
   }
@@ -160,29 +158,25 @@ function renderTag(elem, opts) {
   return tag;
 }
 
-function renderDirective(elem, opts) {
+function renderDirective(elem) {
   return '<' + elem.data + '>';
 }
-
-function renderScript(elem, opts) {
-  return elem.data || '';
-};
 
 function renderText(elem, opts) {
   var data = elem.data || '';
 
   // if entities weren't decoded, no need to encode them back
-  if (!opts.decodeEntities && !(elem.parent && elem.parent.name in unencodedElements)) {
+  if (opts.decodeEntities && !(elem.parent && elem.parent.name in unencodedElements)) {
     data = entities.encodeXML(data);
   }
 
   return data;
 }
 
-function renderCdata(elem, opts) {
+function renderCdata(elem) {
   return '<![CDATA[' + elem.children[0].data + ']]>';
 }
 
-function renderComment(elem, opts) {
+function renderComment(elem) {
   return '<!--' + elem.data + '-->';
 }
