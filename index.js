@@ -48,7 +48,7 @@ var unencodedElements = {
 /*
   Format attributes
 */
-function formatAttrs(attributes) {
+function formatAttrs(attributes, opts) {
   if (!attributes) return;
 
   var output = '',
@@ -64,7 +64,7 @@ function formatAttrs(attributes) {
     if (!value && booleanAttributes[key]) {
       output += key;
     } else {
-      output += key + '="' + entities.escape(value || '') + '"';
+      output += key + '="' + (opts.decodeEntities ? entities.encodeXML(value) : value) + '"';
     }
   }
 
@@ -125,7 +125,7 @@ var render = module.exports = function(dom, opts) {
     else if (elem.type === ElementType.CDATA)
       output += renderCdata(elem);
     else
-      output += renderText(elem);
+      output += renderText(elem, opts);
   }
 
   return output;
@@ -133,7 +133,7 @@ var render = module.exports = function(dom, opts) {
 
 function renderTag(elem, opts) {
   var tag = '<' + elem.name,
-      attribs = formatAttrs(elem.attribs);
+      attribs = formatAttrs(elem.attribs, opts);
 
   if (attribs) {
     tag += ' ' + attribs;
@@ -147,14 +147,14 @@ function renderTag(elem, opts) {
   } else {
     tag += '>';
     tag += render(elem.children, opts);
-  
+
     if (!singleTag[elem.name] || opts.xmlMode) {
       tag += '</' + elem.name + '>';
     }
   }
 
-  
-  
+
+
   return tag;
 }
 
@@ -162,13 +162,14 @@ function renderDirective(elem) {
   return '<' + elem.data + '>';
 }
 
-function renderText(elem) {
-  var data      = elem.data || '';
-      
-  if (!(elem.parent && elem.parent.name in unencodedElements)) {
+function renderText(elem, opts) {
+  var data = elem.data || '';
+
+  // if entities weren't decoded, no need to encode them back
+  if (opts.decodeEntities && !(elem.parent && elem.parent.name in unencodedElements)) {
     data = entities.encodeXML(data);
   }
-  
+
   return data;
 }
 
