@@ -18,11 +18,11 @@
     "entities": "~1.1.1"
   },
   "devDependencies": {
-    "mocha": "*",
+    "cheerio": "*",
     "expect.js": "~0.3.1",
-    "lodash": "~2.4.1",
     "jshint": "~2.3.0",
-    "cheerio": "*"
+    "lodash": "~2.4.1",
+    "mocha": "*"
   },
   "scripts": {
     "test": "mocha test.js"
