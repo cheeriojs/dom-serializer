@@ -22,7 +22,8 @@
     "expect.js": "~0.3.1",
     "jshint": "~2.3.0",
     "lodash": "~2.4.1",
-    "mocha": "*"
+    "mocha": "*",
+    "xyz": "0.3.x"
   },
   "scripts": {
     "test": "mocha test.js"
