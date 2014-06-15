@@ -27,5 +27,6 @@
   },
   "scripts": {
     "test": "mocha test.js"
-  }
+  },
+  "license": "MIT"
 }
