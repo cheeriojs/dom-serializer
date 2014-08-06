@@ -100,4 +100,9 @@ function testBody(html) {
     expect(html(str)).to.equal(str);
   });
 
+  it('should render SVG nodes with a closing slash in HTML mode', function() {
+    var str = '<svg><circle x="12" y="12"/><path d="123M"/></svg>';
+    expect(html(str)).to.equal(str);
+  });
+
 }
