@@ -101,7 +101,7 @@ function testBody(html) {
   });
 
   it('should render SVG nodes with a closing slash in HTML mode', function() {
-    var str = '<svg><circle x="12" y="12"/><path d="123M"/></svg>';
+    var str = '<svg><circle x="12" y="12"/><path d="123M"/><polygon points="60,20 100,40 100,80 60,100 20,80 20,40"/></svg>';
     expect(html(str)).to.equal(str);
   });
 

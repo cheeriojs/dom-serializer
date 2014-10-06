@@ -104,10 +104,11 @@ var singleTag = {
 //common self closing svg elements
 var singleXMLTag = {
   __proto__: null,
-  path: true,
   circle: true,
   ellipse: true,
   line: true,
+  path: true,
+  polygon: true,
   rect: true,
   use: true
 };
