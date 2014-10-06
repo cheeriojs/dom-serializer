@@ -78,15 +78,19 @@ var singleTag = {
   __proto__: null,
   area: true,
   base: true,
+  // obsolete
   basefont: true,
   br: true,
   col: true,
+  // obsolete
   command: true,
   embed: true,
+  // deprecated
   frame: true,
   hr: true,
   img: true,
   input: true,
+  // deprecated
   isindex: true,
   keygen: true,
   link: true,
@@ -95,12 +99,16 @@ var singleTag = {
   source: true,
   track: true,
   wbr: true,
+};
 
-  //common self closing svg elements
-  path: true,
+//common self closing svg elements
+var singleXMLTag = {
+  __proto__: null,
   circle: true,
   ellipse: true,
   line: true,
+  path: true,
+  polygon: true,
   rect: true,
   use: true
 };
@@ -140,8 +148,9 @@ function renderTag(elem, opts) {
   }
 
   if (
-    opts.xmlMode &&
-    (!elem.children || elem.children.length === 0)
+    (opts.xmlMode &&
+    (!elem.children || elem.children.length === 0)) ||
+    singleXMLTag[elem.name]
   ) {
     tag += '/>';
   } else {
