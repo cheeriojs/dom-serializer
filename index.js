@@ -95,14 +95,6 @@ var singleTag = {
   source: true,
   track: true,
   wbr: true,
-
-  //common self closing svg elements
-  path: true,
-  circle: true,
-  ellipse: true,
-  line: true,
-  rect: true,
-  use: true
 };
 
 var render = module.exports = function(dom, opts) {
