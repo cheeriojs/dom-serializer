@@ -13,6 +13,9 @@
     "url": "git://github.com/cheeriojs/dom-renderer.git"
   },
   "main": "./index.js",
+  "files": [
+    "index.js"
+  ],
   "dependencies": {
     "domelementtype": "~1.1.1",
     "entities": "~1.1.1"
