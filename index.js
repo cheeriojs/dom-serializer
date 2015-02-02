@@ -138,7 +138,10 @@ function renderTag(elem, opts) {
     tag += '/>';
   } else {
     tag += '>';
-    tag += render(elem.children, opts);
+    
+    if (elem.children) {
+      tag += render(elem.children, opts);
+    }
 
     if (!singleTag[elem.name] || opts.xmlMode) {
       tag += '</' + elem.name + '>';
