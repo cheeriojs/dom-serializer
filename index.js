@@ -97,6 +97,7 @@ var singleTag = {
   wbr: true,
 };
 
+
 var render = module.exports = function(dom, opts) {
   if (!Array.isArray(dom) && !dom.cheerio) dom = [dom];
   opts = opts || {};
@@ -124,6 +125,9 @@ var render = module.exports = function(dom, opts) {
 };
 
 function renderTag(elem, opts) {
+  // Handle SVG
+  if (elem.name === "svg") opts = {decodeEntities: opts.decodeEntities, xmlMode: true};
+
   var tag = '<' + elem.name,
       attribs = formatAttrs(elem.attribs, opts);
 
@@ -132,13 +136,12 @@ function renderTag(elem, opts) {
   }
 
   if (
-    opts.xmlMode &&
-    (!elem.children || elem.children.length === 0)
+    opts.xmlMode
+    && (!elem.children || elem.children.length === 0)
   ) {
     tag += '/>';
   } else {
     tag += '>';
-    
     if (elem.children) {
       tag += render(elem.children, opts);
     }
@@ -147,8 +150,6 @@ function renderTag(elem, opts) {
       tag += '</' + elem.name + '>';
     }
   }
-
-
 
   return tag;
 }
