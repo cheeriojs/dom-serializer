@@ -26,7 +26,7 @@ describe('render', function() {
     // since currently it will convert <hr class='blah'> into <hr class="blah"> anyway.
     it('should handle double quotes within single quoted attributes properly', function() {
       var str = '<hr class=\'an "edge" case\' />';
-      expect(htmlFunc(str)).to.equal('<hr class="an &quot;edge&quot; case">');
+      expect(htmlFunc(str)).to.equal('<hr class="an &quot;edge&quot; case"/>');
     });
   });
 
@@ -52,22 +52,22 @@ function testBody(html) {
 
   it('should render <br /> tags correctly', function() {
     var str = '<br />';
-    expect(html(str)).to.equal('<br>');
+    expect(html(str)).to.equal('<br/>');
   });
 
   it('should retain encoded HTML content within attributes', function() {
     var str = '<hr class="cheerio &amp; node = happy parsing" />';
-    expect(html(str)).to.equal('<hr class="cheerio &amp; node = happy parsing">');
+    expect(html(str)).to.equal('<hr class="cheerio &amp; node = happy parsing"/>');
   });
 
   it('should shorten the "checked" attribute when it contains the value "checked"', function() {
     var str = '<input checked/>';
-    expect(html(str)).to.equal('<input checked>');
+    expect(html(str)).to.equal('<input checked/>');
   });
 
   it('should not shorten the "name" attribute when it contains the value "name"', function() {
     var str = '<input name="name"/>';
-    expect(html(str)).to.equal('<input name="name">');
+    expect(html(str)).to.equal('<input name="name"/>');
   });
 
   it('should render comments correctly', function() {
