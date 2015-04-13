@@ -141,7 +141,11 @@ function renderTag(elem, opts) {
   ) {
     tag += '/>';
   } else {
-    tag += '>';
+    if (singleTag[elem.name] && !opts.xmlMode) {
+      tag += '/>';
+    } else {
+      tag += '>';
+    }
     if (elem.children) {
       tag += render(elem.children, opts);
     }
