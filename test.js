@@ -95,6 +95,12 @@ function generalTest(html) {
 }
 
 function selfClosingTest(html) {
+
+  it('should render nested HTML with self closing in it correctly', function() {
+    var str = '<div>somethig<span>Other thing</span><hr/></div>';
+    expect(html(str)).to.equal(str);
+  });
+
   it('should render <br /> tags correctly', function() {
     var str = '<br />';
     expect(html(str)).to.equal('<br/>');
@@ -118,6 +124,12 @@ function selfClosingTest(html) {
 }
 
 function testBody(html) {
+
+  it('should render nested HTML with self closing in it correctly', function() {
+    var str = '<div>somethig<span>Other thing</span><hr/></div>';
+    expect(html(str)).to.equal('<div>somethig<span>Other thing</span><hr></div>');
+  });
+
   it('should render <br /> tags correctly', function() {
     var str = '<br />';
     expect(html(str)).to.equal('<br>');

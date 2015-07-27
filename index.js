@@ -136,16 +136,13 @@ function renderTag(elem, opts) {
   }
 
   if (
-    opts.xmlMode
-    && (!elem.children || elem.children.length === 0)
+    (opts.xmlMode
+    && (!elem.children || elem.children.length === 0)) ||
+    (singleTag[elem.name] && opts.recognizeSelfClosing)
   ) {
     tag += '/>';
   } else {
-    if (singleTag[elem.name] && opts.recognizeSelfClosing) {
-      tag += '/>';
-    } else {
-      tag += '>';
-    }
+    tag += '>';
     if (elem.children) {
       tag += render(elem.children, opts);
     }
