@@ -141,7 +141,7 @@ function renderTag(elem, opts) {
   ) {
     tag += '/>';
   } else {
-    if (singleTag[elem.name] && !opts.xmlMode) {
+    if (singleTag[elem.name] && opts.recognizeSelfClosing) {
       tag += '/>';
     } else {
       tag += '>';
