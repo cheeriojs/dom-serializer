@@ -129,14 +129,15 @@ function renderTag(elem, opts) {
   if (elem.name === "svg") opts = {decodeEntities: opts.decodeEntities, xmlMode: true};
 
   var tag = '<' + elem.name,
-      attribs = formatAttrs(elem.attribs, opts);
+      attribs = formatAttrs(elem.attribs, opts),
+      xmlMode = opts.xmlMode && (!opts.xmlModeTag || opts.xmlModeTag[elem.name]);
 
   if (attribs) {
     tag += ' ' + attribs;
   }
 
   if (
-    opts.xmlMode
+    xmlMode
     && (!elem.children || elem.children.length === 0)
   ) {
     tag += '/>';
@@ -146,7 +147,7 @@ function renderTag(elem, opts) {
       tag += render(elem.children, opts);
     }
 
-    if (!singleTag[elem.name] || opts.xmlMode) {
+    if (!singleTag[elem.name] || xmlMode) {
       tag += '</' + elem.name + '>';
     }
   }
