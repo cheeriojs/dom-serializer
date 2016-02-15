@@ -42,6 +42,11 @@ describe('render', function() {
       var str = '<a> <b> <![CDATA[ asdf&asdf ]]> <c/> <![CDATA[ asdf&asdf ]]> </b> </a>';
       expect(xml(str)).to.equal(str);
     });
+    
+    it('should append ="" to attributes with no value', function() {
+      var str = '<div dropdown-toggle>';
+      expect(xml(str)).to.equal('<div dropdown-toggle=""/>');
+    });    
 
   });
 
@@ -69,6 +74,11 @@ function testBody(html) {
     var str = '<input name="name"/>';
     expect(html(str)).to.equal('<input name="name">');
   });
+  
+  it('should not append ="" to attributes with no value', function() {
+    var str = '<div dropdown-toggle>';
+    expect(html(str)).to.equal('<div dropdown-toggle></div>');
+  });  
 
   it('should render comments correctly', function() {
     var str = '<!-- comment -->';
