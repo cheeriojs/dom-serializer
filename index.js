@@ -57,6 +57,9 @@ function formatAttrs(attributes, opts) {
   // Loop through the attributes
   for (var key in attributes) {
     value = attributes[key];
+    if (opts.decodeEntities) {
+      value = entities.encodeXML(value);
+    }
     if (output) {
       output += ' ';
     }
@@ -64,7 +67,11 @@ function formatAttrs(attributes, opts) {
     if (!value && booleanAttributes[key]) {
       output += key;
     } else {
-      output += key + '="' + (opts.decodeEntities ? entities.encodeXML(value) : value) + '"';
+      var quote = '"';
+      if (value.indexOf('"') > -1) {
+        quote = '\'';
+      }
+      output += key + '=' + quote + value + quote;
     }
   }
 
