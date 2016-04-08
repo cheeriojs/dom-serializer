@@ -43,6 +43,11 @@ describe('render', function() {
       expect(xml(str)).to.equal(str);
     });
 
+    it('should append ="" to attributes with no value', function() {
+      var str = '<div dropdown-toggle>';
+      expect(xml(str)).to.equal('<div dropdown-toggle=""/>');
+    });
+
   });
 
 });
@@ -68,6 +73,11 @@ function testBody(html) {
   it('should not shorten the "name" attribute when it contains the value "name"', function() {
     var str = '<input name="name"/>';
     expect(html(str)).to.equal('<input name="name">');
+  });
+
+  it('should not append ="" to attributes with no value', function() {
+    var str = '<div dropdown-toggle>';
+    expect(html(str)).to.equal('<div dropdown-toggle></div>');
   });
 
   it('should render comments correctly', function() {

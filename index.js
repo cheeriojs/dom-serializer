@@ -61,10 +61,9 @@ function formatAttrs(attributes, opts) {
       output += ' ';
     }
 
-    if (!value && booleanAttributes[key]) {
-      output += key;
-    } else {
-      output += key + '="' + (opts.decodeEntities ? entities.encodeXML(value) : value) + '"';
+    output += key;
+    if ((value !== null && value !== '') || (opts.xmlMode && !booleanAttributes[key])) {
+        output += '="' + (opts.decodeEntities ? entities.encodeXML(value) : value) + '"';
     }
   }
 
