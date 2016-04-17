@@ -48,6 +48,11 @@ describe('render', function() {
       expect(xml(str)).to.equal('<div dropdown-toggle=""/>');
     });
 
+    it('should append ="" to boolean attributes with no value', function() {
+      var str = '<input disabled>';
+      expect(xml(str)).to.equal('<input disabled=""/>');
+    });
+
   });
 
 });
