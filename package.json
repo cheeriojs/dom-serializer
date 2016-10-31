@@ -24,7 +24,7 @@
     "cheerio": "*",
     "expect.js": "~0.3.1",
     "jshint": "~2.9.1-rc1",
-    "lodash": "~4.14.2",
+    "lodash": "~4.16.5",
     "mocha": "*",
     "xyz": "1.1.0"
   },
