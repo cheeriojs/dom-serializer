@@ -21,7 +21,7 @@
     "entities": "~1.1.1"
   },
   "devDependencies": {
-    "cheerio": "*",
+    "cheerio": "0.21.0",
     "expect.js": "~0.3.1",
     "jshint": "~2.9.1-rc1",
     "lodash": "~4.16.5",
