@@ -36,6 +36,9 @@ describe('render', function() {
   // run html with turned off decodeEntities
   describe('(html, {decodeEntities: false})', _.partial( testBody, _.partial(html, {decodeEntities: false}) ));
 
+  // run html with turned on recognizeSelfClosing
+  describe('(html, {recognizeSelfClosing: true})', _.partial( selfClosingTest, _.partial(html, {recognizeSelfClosing: true}) ));
+
   describe('(xml)', function() {
 
     it('should render CDATA correctly', function() {
@@ -58,27 +61,7 @@ describe('render', function() {
 });
 
 
-function testBody(html) {
-
-  it('should render <br /> tags correctly', function() {
-    var str = '<br />';
-    expect(html(str)).to.equal('<br>');
-  });
-
-  it('should retain encoded HTML content within attributes', function() {
-    var str = '<hr class="cheerio &amp; node = happy parsing" />';
-    expect(html(str)).to.equal('<hr class="cheerio &amp; node = happy parsing">');
-  });
-
-  it('should shorten the "checked" attribute when it contains the value "checked"', function() {
-    var str = '<input checked/>';
-    expect(html(str)).to.equal('<input checked>');
-  });
-
-  it('should not shorten the "name" attribute when it contains the value "name"', function() {
-    var str = '<input name="name"/>';
-    expect(html(str)).to.equal('<input name="name">');
-  });
+function generalTest(html) {
 
   it('should not append ="" to attributes with no value', function() {
     var str = '<div dropdown-toggle>';
@@ -124,4 +107,62 @@ function testBody(html) {
     var str = '<iframe src="test"></iframe>';
     expect(html(str)).to.equal(str);
   });
+}
+
+function selfClosingTest(html) {
+
+  it('should render nested HTML with self closing in it correctly', function() {
+    var str = '<div>somethig<span>Other thing</span><hr/></div>';
+    expect(html(str)).to.equal(str);
+  });
+
+  it('should render <br /> tags correctly', function() {
+    var str = '<br />';
+    expect(html(str)).to.equal('<br/>');
+  });
+
+  it('should retain encoded HTML content within attributes', function() {
+    var str = '<hr class="cheerio &amp; node = happy parsing" />';
+    expect(html(str)).to.equal('<hr class="cheerio &amp; node = happy parsing"/>');
+  });
+
+  it('should shorten the "checked" attribute when it contains the value "checked"', function() {
+    var str = '<input checked/>';
+    expect(html(str)).to.equal('<input checked/>');
+  });
+
+  it('should not shorten the "name" attribute when it contains the value "name"', function() {
+    var str = '<input name="name"/>';
+    expect(html(str)).to.equal('<input name="name"/>');
+  });
+  generalTest(html);
+}
+
+function testBody(html) {
+
+  it('should render nested HTML with self closing in it correctly', function() {
+    var str = '<div>somethig<span>Other thing</span><hr/></div>';
+    expect(html(str)).to.equal('<div>somethig<span>Other thing</span><hr></div>');
+  });
+
+  it('should render <br /> tags correctly', function() {
+    var str = '<br />';
+    expect(html(str)).to.equal('<br>');
+  });
+
+  it('should retain encoded HTML content within attributes', function() {
+    var str = '<hr class="cheerio &amp; node = happy parsing" />';
+    expect(html(str)).to.equal('<hr class="cheerio &amp; node = happy parsing">');
+  });
+
+  it('should shorten the "checked" attribute when it contains the value "checked"', function() {
+    var str = '<input checked/>';
+    expect(html(str)).to.equal('<input checked>');
+  });
+
+  it('should not shorten the "name" attribute when it contains the value "name"', function() {
+    var str = '<input name="name"/>';
+    expect(html(str)).to.equal('<input name="name">');
+  });
+  generalTest(html);
 }
