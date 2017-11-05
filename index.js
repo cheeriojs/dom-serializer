@@ -33,7 +33,7 @@ function formatAttrs(attributes, opts) {
     }
 
     output += key;
-    if ((value !== null && value !== '') || opts.xmlMode) {
+    if ((value !== null && value !== '') || opts.xmlMode || opts.emptyAttrs) {
         output += '="' + (opts.decodeEntities ? entities.encodeXML(value) : value) + '"';
     }
   }
