@@ -67,6 +67,9 @@ var singleTag = {
   wbr: true,
 };
 
+var xmlModeTags = {
+  svg: true
+};
 
 var render = module.exports = function(dom, opts) {
   if (!Array.isArray(dom) && !dom.cheerio) dom = [dom];
@@ -80,7 +83,7 @@ var render = module.exports = function(dom, opts) {
     if (elem.type === 'root')
       output += render(elem.children, opts);
     else if (ElementType.isTag(elem))
-      output += renderTag(elem, opts);
+      output += (elem.name in xmlModeTags) ? renderTag(elem, Object.assign({}, opts, { xmlMode: true })) : renderTag(elem, opts);
     else if (elem.type === ElementType.Directive)
       output += renderDirective(elem);
     else if (elem.type === ElementType.Comment)
