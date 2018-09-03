@@ -168,4 +168,20 @@ function testBody(html) {
     var str = '<iframe src="test"></iframe>';
     expect(html(str)).to.equal(str);
   });
+
+  it('should always (regardless of decodeEntities) escape < in text nodes', function() {
+    // from https://github.com/fb55/htmlparser2/issues/105
+    var str = '<<img src="javascript:evil"/>img src="javascript:evil"/>';
+    expect(html(str)).to.match(/^&lt;<img src="/);
+  });
+
+  it('should not escape < in scripts', function() {
+    var str = '<script>console.log(a<b)</script>';
+    expect(html(str)).to.equal(str);
+  });
+
+  it('should always (regardless of decodeEntities) escape double quotes in attributes', function() {
+    var str = '<img alt="double quote: &quot;" title=\'double quote: "\'>';
+    expect(html(str)).to.equal('<img alt="double quote: &quot;" title="double quote: &quot;">');
+  });
 }

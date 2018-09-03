@@ -163,12 +163,15 @@ function renderDirective(elem) {
 function renderText(elem, opts) {
   var data = elem.data || '';
 
-  // if entities weren't decoded, no need to encode them back
-  if (
-    opts.decodeEntities &&
-    !(elem.parent && elem.parent.name in unencodedElements)
-  ) {
-    data = entities.encodeXML(data);
+  if (!(elem.parent && elem.parent.name in unencodedElements)) {
+    if (opts.decodeEntities) {
+      data = entities.encodeXML(data);
+    } else {
+      // If entities weren't decoded, no need to encode them back.
+      // Nevertheless let's escape `<` as it's able to sneak in unescaped,
+      // see https://github.com/fb55/htmlparser2/issues/105
+      data = data.replace(/</g, '&lt;');
+    }
   }
 
   return data;
