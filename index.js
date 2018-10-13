@@ -96,8 +96,13 @@ var render = module.exports = function(dom, opts) {
 };
 
 function renderTag(elem, opts) {
-  // Handle SVG
-  if (elem.name === "svg") opts = {decodeEntities: opts.decodeEntities, xmlMode: true};
+  // Handle SVG / MathML in HTML
+  if (
+      (!opts.xmlMode) 
+      && (['svg', 'math'].indexOf(elem.name) >= 0)
+  ) {
+    opts = Object.assign({}, opts, { xmlMode: 'foreign' });
+  }
 
   var tag = '<' + elem.name,
       attribs = formatAttrs(elem.attribs, opts);

@@ -124,6 +124,11 @@ function testBody(html) {
     expect(html(str)).to.equal(str);
   });
 
+  it('should render childless MathML nodes with a closing slash in HTML mode', function() {
+    var str = '<math><infinity/></math>';
+    expect(html(str)).to.equal(str);
+  });
+
   it('should preserve XML prefixed attributes on inline SVG nodes in HTML mode', function() {
     var str = '<svg><text id="t" xml:lang="fr">Bonjour</text><use xlink:href="#t"/></svg>';
     expect(html(str)).to.equal(str);
