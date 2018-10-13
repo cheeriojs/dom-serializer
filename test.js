@@ -17,11 +17,11 @@ var xml = function(str, options) {
   return render(dom, options);
 };
 
-describe('render', function() {
+describe('render DOM parsed with htmlparser2', function() {
 
   // only test applicable to the default setup
   describe('(html)', function() {
-    var htmlFunc = _.partial(html, {});
+    var htmlFunc = _.partial(html, {_useHtmlParser2: true});
     // it doesn't really make sense for {decodeEntities: false}
     // since currently it will convert <hr class='blah'> into <hr class="blah"> anyway.
     it('should handle double quotes within single quoted attributes properly', function() {
@@ -31,10 +31,10 @@ describe('render', function() {
   });
 
   // run html with default options
-  describe('(html, {})', _.partial( testBody, _.partial(html, {}) ));
+  describe('(html, {})', _.partial( testBody, _.partial(html, {_useHtmlParser2: true}) ));
 
   // run html with turned off decodeEntities
-  describe('(html, {decodeEntities: false})', _.partial( testBody, _.partial(html, {decodeEntities: false}) ));
+  describe('(html, {decodeEntities: false})', _.partial( testBody, _.partial(html, {_useHtmlParser2: true, decodeEntities: false}) ));
 
   describe('(xml)', function() {
 
