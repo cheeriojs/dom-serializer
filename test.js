@@ -53,10 +53,14 @@ describe('render DOM parsed with htmlparser2', function() {
       expect(xml(str)).to.equal('<input disabled=""/>');
     });
 
+    it('should preserve XML prefixes on attributes', function() {
+      var str = '<div xmlns:ex="http://example.com/ns"><p ex:ample="attribute">text</p></div>';
+      expect(xml(str)).to.equal(str);
+    });
+
   });
 
 });
-
 
 function testBody(html) {
 
@@ -115,12 +119,17 @@ function testBody(html) {
     expect(html(str)).to.equal(str);
   });
 
-  it('should render SVG nodes with a closing slash in HTML mode', function() {
+  it('should render childless SVG nodes with a closing slash in HTML mode', function() {
     var str = '<svg><circle x="12" y="12"/><path d="123M"/><polygon points="60,20 100,40 100,80 60,100 20,80 20,40"/></svg>';
     expect(html(str)).to.equal(str);
   });
 
-  it('should render iframe nodes with a closing slash in HTML mode', function() {
+  it('should preserve XML prefixed attributes on inline SVG nodes in HTML mode', function() {
+    var str = '<svg><text id="t" xml:lang="fr">Bonjour</text><use xlink:href="#t"/></svg>';
+    expect(html(str)).to.equal(str);
+  });
+
+  it('should render iframe nodes with a closing tag in HTML mode', function() {
     var str = '<iframe src="test"></iframe>';
     expect(html(str)).to.equal(str);
   });
