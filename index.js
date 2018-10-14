@@ -112,6 +112,23 @@ function renderTag(elem, opts) {
   if ((opts.xmlMode === 'foreign')) {
     /* fix up mixed-case element names */
     elem.name = (foreignNames.elementNames[elem.name] || elem.name);
+    /* exit foreign mode at integration points */
+    if (
+        elem.parent
+        && ([
+              'mi',
+              'mo',
+              'mn',
+              'ms',
+              'mtext',
+              'annotation-xml',
+              'foreignObject',
+              'desc',
+              'title'
+            ].indexOf(elem.parent.name) >= 0
+        )
+    )
+      opts = Object.assign({}, opts, { xmlMode: false });
   }
   if (
       (!opts.xmlMode) 

@@ -144,6 +144,11 @@ function testBody(html) {
     expect(html(str)).to.equal(str);
   });
 
+  it('should render HTML content in SVG foreignObject in HTML mode', function() {
+    var str = '<svg><foreignObject requiredFeatures=""><img src="test.png" viewbox>text<svg viewBox="0 0 8 8"><circle r="3"/></svg></foreignObject></svg>';
+    expect(html(str)).to.equal(str);
+  });
+
   it('should render iframe nodes with a closing tag in HTML mode', function() {
     var str = '<iframe src="test"></iframe>';
     expect(html(str)).to.equal(str);
