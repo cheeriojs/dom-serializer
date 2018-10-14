@@ -145,17 +145,27 @@ function renderTag(elem, opts) {
   }
 
   if (
-    opts.xmlMode
-    && (!elem.children || elem.children.length === 0)
+    (!elem.children || elem.children.length === 0)
+    && (
+      opts.xmlMode ?
+        (opts.selfClosingTags || (opts.selfClosingTags === void(0) ))
+        // in XML mode or foreign mode, and user hasn't explicitly turned off self-closing tags
+      : (
+        opts.selfClosingTags // user explicitly asked for self-closing tags, even in HTML mode
+        && singleTag[elem.name]
+      )
+    )
   ) {
+    if (!opts.xmlMode) tag += ' ';
     tag += '/>';
   } else {
     tag += '>';
+    closeTagRequired = true;
     if (elem.children) {
       tag += render(elem.children, opts);
     }
 
-    if (!singleTag[elem.name] || opts.xmlMode) {
+    if (!singleTag[elem.name]) {
       tag += '</' + elem.name + '>';
     }
   }

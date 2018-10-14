@@ -65,11 +65,38 @@ describe('render DOM parsed with htmlparser2', function() {
 
   });
 
+  describe('(xml, {selfClosingTags: false})', function() {
+
+    it('should render childless nodes with an explicit closing tag', function() {
+      var str = '<foo /><bar></bar>';
+      expect(xml(str, {selfClosingTags: false})).to.equal('<foo></foo><bar></bar>');
+    });
+
+  });
+
+  describe('(html, {selfClosingTags: true})', _.partial(function(html) {
+
+    it('should render <br /> tags correctly', function() {
+      var str = '<br />';
+      expect(html(str)).to.equal(str);
+    });
+    
+  }, _.partial(html, {_useHtmlParser2: true, decodeEntities: false, selfClosingTags: true}) ));
+
+  describe('(html, {selfClosingTags: false})', _.partial(function(html) {
+
+    it('should render childless SVG nodes with an explicit closing tag', function() {
+      var str = '<svg><circle x="12" y="12"></circle><path d="123M"></path><polygon points="60,20 100,40 100,80 60,100 20,80 20,40"></polygon></svg>';
+      expect(html(str)).to.equal(str);
+    });
+
+  }, _.partial(html, {_useHtmlParser2: true, decodeEntities: false, selfClosingTags: false}) ));
+
 });
 
 function testBody(html) {
 
-  it('should render <br /> tags correctly', function() {
+  it('should render <br /> tags without a slash', function() {
     var str = '<br />';
     expect(html(str)).to.equal('<br>');
   });
