@@ -4,6 +4,14 @@
 var ElementType = require('domelementtype');
 var entities = require('entities');
 
+/* mixed-case SVG and MathML tags & attributes
+   recognized by the HTML parser, see
+   https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inforeign
+*/
+var foreignNames = require('./foreignNames.json');
+foreignNames.elementNames.__proto__ = null; /* use as a simple dictionary */
+foreignNames.attributeNames.__proto__ = null;
+
 var unencodedElements = {
   __proto__: null,
   style: true,
@@ -32,6 +40,10 @@ function formatAttrs(attributes, opts) {
       output += ' ';
     }
 
+    if ((opts.xmlMode === 'foreign')) {
+      /* fix up mixed-case attribute names */
+      key = (foreignNames.attributeNames[key] || key);
+    }
     output += key;
     if ((value !== null && value !== '') || opts.xmlMode) {
         output += '="' + (opts.decodeEntities ? entities.encodeXML(value) :
@@ -97,6 +109,10 @@ var render = module.exports = function(dom, opts) {
 
 function renderTag(elem, opts) {
   // Handle SVG / MathML in HTML
+  if ((opts.xmlMode === 'foreign')) {
+    /* fix up mixed-case element names */
+    elem.name = (foreignNames.elementNames[elem.name] || elem.name);
+  }
   if (
       (!opts.xmlMode) 
       && (['svg', 'math'].indexOf(elem.name) >= 0)

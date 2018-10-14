@@ -58,6 +58,11 @@ describe('render DOM parsed with htmlparser2', function() {
       expect(xml(str)).to.equal(str);
     });
 
+    it('should preserve mixed-case XML elements and attributes', function() {
+      var str = '<svg viewBox="0 0 8 8"><radialGradient/></svg>';
+      expect(xml(str)).to.equal(str);
+    });
+
   });
 
 });
@@ -131,6 +136,11 @@ function testBody(html) {
 
   it('should preserve XML prefixed attributes on inline SVG nodes in HTML mode', function() {
     var str = '<svg><text id="t" xml:lang="fr">Bonjour</text><use xlink:href="#t"/></svg>';
+    expect(html(str)).to.equal(str);
+  });
+
+  it('should handle mixed-case SVG content in HTML mode', function() {
+    var str = '<svg viewBox="0 0 8 8"><radialGradient/></svg>';
     expect(html(str)).to.equal(str);
   });
 
