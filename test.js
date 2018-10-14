@@ -134,6 +134,21 @@ function testBody(html) {
     expect(html(str)).to.equal(str);
   });
 
+  it('should allow SVG elements to have children', function() {
+    var str = '<svg><circle cx="12" r="12"><title>dot</title></circle></svg>';
+    expect(html(str)).to.equal(str);
+  });
+
+  it('should not include extra whitespace in SVG self-closed elements', function() {
+    var str = '<svg><image href="x.png"/>     </svg>';
+    expect(html(str)).to.equal(str);
+  });
+
+  it('should fix-up bad nesting in SVG in HTML mode', function() {
+    var str = '<svg><g><image href="x.png"></svg>';
+    expect(html(str)).to.equal('<svg><g><image href="x.png"/></g></svg>');
+  });
+
   it('should preserve XML prefixed attributes on inline SVG nodes in HTML mode', function() {
     var str = '<svg><text id="t" xml:lang="fr">Bonjour</text><use xlink:href="#t"/></svg>';
     expect(html(str)).to.equal(str);
