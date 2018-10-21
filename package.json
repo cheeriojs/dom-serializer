@@ -1,6 +1,6 @@
 {
   "name": "dom-serializer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "render dom nodes to string",
   "author": "Felix Boehm <me@feedic.com>",
   "keywords": [
@@ -19,13 +19,13 @@
   ],
   "dependencies": {
     "domelementtype": "~1.3.0",
-    "entities": "~1.1.1"
+    "entities": "^1.1.2"
   },
   "devDependencies": {
     "cheerio": "^1.0.0-rc.2",
     "expect.js": "~0.3.1",
-    "jshint": "~2.9.1-rc1",
-    "lodash": "~4.16.5",
+    "htmlparser2": "^3.10.0",
+    "lodash": "^4.17.11",
     "mocha": "*",
     "xyz": "1.1.0"
   },
