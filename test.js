@@ -95,10 +95,11 @@ function testBody(html) {
     expect(html(str)).to.equal(str);
   });
 
-  it('should normalize whitespace if specified', function() {
-    var str = '<a href="./haha.html">hi</a> <a href="./blah.html">blah  </a>';
-    expect(html(str, { normalizeWhitespace: true })).to.equal('<a href="./haha.html">hi</a> <a href="./blah.html">blah </a>');
-  });
+  // `normalizeWhitespace` is an option for `htmlparser2`, not `parse5`.
+  // it('should normalize whitespace if specified', function() {
+  //   var str = '<a href="./haha.html">hi</a> <a href="./blah.html">blah  </a>';
+  //   expect(html(str, { normalizeWhitespace: true })).to.equal('<a href="./haha.html">hi</a> <a href="./blah.html">blah </a>');
+  // });
 
   it('should preserve multiple hyphens in data attributes', function() {
     var str = '<div data-foo-bar-baz="value"></div>';

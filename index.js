@@ -17,6 +17,30 @@ var unencodedElements = {
 };
 
 /*
+  Escape special symbols in HTML.
+*/
+function escapeHTML(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+function escape(str, opts) {
+  // After cheerio 1.0.0-RC3, parser API has changed.
+  // When xmlMode is true, cheerio uses `htmlparser2`,
+  // if `decodeEntities` is false, `htmlparser2` won't decode `&lt;`.
+  // When xmlMode is false, cheerio uses `parse5`, which by default
+  // decode all entities like `&lt;` and does not support `decodeEntities`,
+  // so we need to escape before output.
+  return opts.xmlMode
+    ? (opts.decodeEntities ? entities.encodeXML(str) : str)
+    : escapeHTML(str);
+}
+
+/*
   Format attributes
 */
 function formatAttrs(attributes, opts) {
@@ -34,7 +58,7 @@ function formatAttrs(attributes, opts) {
 
     output += key;
     if ((value !== null && value !== '') || opts.xmlMode) {
-        output += '="' + (opts.decodeEntities ? entities.encodeXML(value) : value) + '"';
+      output += '="' + escape(value, opts) + '"';
     }
   }
 
@@ -131,9 +155,8 @@ function renderDirective(elem) {
 function renderText(elem, opts) {
   var data = elem.data || '';
 
-  // if entities weren't decoded, no need to encode them back
-  if (opts.decodeEntities && !(elem.parent && elem.parent.name in unencodedElements)) {
-    data = entities.encodeXML(data);
+  if (!(elem.parent && elem.parent.name in unencodedElements)) {
+    data = escape(data, opts);
   }
 
   return data;
