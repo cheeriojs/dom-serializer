@@ -42,6 +42,18 @@ function formatAttrs(attributes, opts) {
 }
 
 /*
+  Escape special symbols in HTML.
+*/
+function escapeHTML(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+/*
   Self-enclosing tags (stolen from node-htmlparser)
 */
 var singleTag = {
@@ -131,9 +143,17 @@ function renderDirective(elem) {
 function renderText(elem, opts) {
   var data = elem.data || '';
 
-  // if entities weren't decoded, no need to encode them back
-  if (opts.decodeEntities && !(elem.parent && elem.parent.name in unencodedElements)) {
-    data = entities.encodeXML(data);
+  if (!(elem.parent && elem.parent.name in unencodedElements)) {
+    // When cheerio reading (decoding) input, it will unescape symbols
+    // like `&lt` to `<` in innerHTML, no matter whether `decodeEntities`
+    // is `true` or `false`.
+    if (opts.decodeEntities) {
+      // `entities.encodeXML()` will do escape so we won't escape.
+      data = entities.encodeXML(data);
+    } else {
+      // We need to escape by ourselves.
+      data = escapeHTML(data)
+    }
   }
 
   return data;
