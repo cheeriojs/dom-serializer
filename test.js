@@ -17,11 +17,11 @@ var xml = function(str, options) {
   return render(dom, options);
 };
 
-describe('render', function() {
+describe('render DOM parsed with htmlparser2', function() {
 
   // only test applicable to the default setup
   describe('(html)', function() {
-    var htmlFunc = _.partial(html, {});
+    var htmlFunc = _.partial(html, {_useHtmlParser2: true});
     // it doesn't really make sense for {decodeEntities: false}
     // since currently it will convert <hr class='blah'> into <hr class="blah"> anyway.
     it('should handle double quotes within single quoted attributes properly', function() {
@@ -31,10 +31,10 @@ describe('render', function() {
   });
 
   // run html with default options
-  describe('(html, {})', _.partial( testBody, _.partial(html, {}) ));
+  describe('(html, {})', _.partial( testBody, _.partial(html, {_useHtmlParser2: true}) ));
 
   // run html with turned off decodeEntities
-  describe('(html, {decodeEntities: false})', _.partial( testBody, _.partial(html, {decodeEntities: false}) ));
+  describe('(html, {decodeEntities: false})', _.partial( testBody, _.partial(html, {_useHtmlParser2: true, decodeEntities: false}) ));
 
   describe('(xml)', function() {
 
@@ -53,10 +53,19 @@ describe('render', function() {
       expect(xml(str)).to.equal('<input disabled=""/>');
     });
 
+    it('should preserve XML prefixes on attributes', function() {
+      var str = '<div xmlns:ex="http://example.com/ns"><p ex:ample="attribute">text</p></div>';
+      expect(xml(str)).to.equal(str);
+    });
+
+    it('should preserve mixed-case XML elements and attributes', function() {
+      var str = '<svg viewBox="0 0 8 8"><radialGradient/></svg>';
+      expect(xml(str)).to.equal(str);
+    });
+
   });
 
 });
-
 
 function testBody(html) {
 
@@ -115,12 +124,47 @@ function testBody(html) {
     expect(html(str)).to.equal(str);
   });
 
-  it('should render SVG nodes with a closing slash in HTML mode', function() {
+  it('should render childless SVG nodes with a closing slash in HTML mode', function() {
     var str = '<svg><circle x="12" y="12"/><path d="123M"/><polygon points="60,20 100,40 100,80 60,100 20,80 20,40"/></svg>';
     expect(html(str)).to.equal(str);
   });
 
-  it('should render iframe nodes with a closing slash in HTML mode', function() {
+  it('should render childless MathML nodes with a closing slash in HTML mode', function() {
+    var str = '<math><infinity/></math>';
+    expect(html(str)).to.equal(str);
+  });
+
+  it('should allow SVG elements to have children', function() {
+    var str = '<svg><circle cx="12" r="12"><title>dot</title></circle></svg>';
+    expect(html(str)).to.equal(str);
+  });
+
+  it('should not include extra whitespace in SVG self-closed elements', function() {
+    var str = '<svg><image href="x.png"/>     </svg>';
+    expect(html(str)).to.equal(str);
+  });
+
+  it('should fix-up bad nesting in SVG in HTML mode', function() {
+    var str = '<svg><g><image href="x.png"></svg>';
+    expect(html(str)).to.equal('<svg><g><image href="x.png"/></g></svg>');
+  });
+
+  it('should preserve XML prefixed attributes on inline SVG nodes in HTML mode', function() {
+    var str = '<svg><text id="t" xml:lang="fr">Bonjour</text><use xlink:href="#t"/></svg>';
+    expect(html(str)).to.equal(str);
+  });
+
+  it('should handle mixed-case SVG content in HTML mode', function() {
+    var str = '<svg viewBox="0 0 8 8"><radialGradient/></svg>';
+    expect(html(str)).to.equal(str);
+  });
+
+  it('should render HTML content in SVG foreignObject in HTML mode', function() {
+    var str = '<svg><foreignObject requiredFeatures=""><img src="test.png" viewbox>text<svg viewBox="0 0 8 8"><circle r="3"/></svg></foreignObject></svg>';
+    expect(html(str)).to.equal(str);
+  });
+
+  it('should render iframe nodes with a closing tag in HTML mode', function() {
     var str = '<iframe src="test"></iframe>';
     expect(html(str)).to.equal(str);
   });

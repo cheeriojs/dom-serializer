@@ -4,6 +4,14 @@
 var ElementType = require('domelementtype');
 var entities = require('entities');
 
+/* mixed-case SVG and MathML tags & attributes
+   recognized by the HTML parser, see
+   https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inforeign
+*/
+var foreignNames = require('./foreignNames.json');
+foreignNames.elementNames.__proto__ = null; /* use as a simple dictionary */
+foreignNames.attributeNames.__proto__ = null;
+
 var unencodedElements = {
   __proto__: null,
   style: true,
@@ -32,9 +40,14 @@ function formatAttrs(attributes, opts) {
       output += ' ';
     }
 
+    if ((opts.xmlMode === 'foreign')) {
+      /* fix up mixed-case attribute names */
+      key = (foreignNames.attributeNames[key] || key);
+    }
     output += key;
     if ((value !== null && value !== '') || opts.xmlMode) {
-        output += '="' + (opts.decodeEntities ? entities.encodeXML(value) : value) + '"';
+        output += '="' + (opts.decodeEntities ? entities.encodeXML(value) :
+                            value.replace(/\"/g, '&quot;')) + '"';
     }
   }
 
@@ -95,8 +108,34 @@ var render = module.exports = function(dom, opts) {
 };
 
 function renderTag(elem, opts) {
-  // Handle SVG
-  if (elem.name === "svg") opts = {decodeEntities: opts.decodeEntities, xmlMode: true};
+  // Handle SVG / MathML in HTML
+  if ((opts.xmlMode === 'foreign')) {
+    /* fix up mixed-case element names */
+    elem.name = (foreignNames.elementNames[elem.name] || elem.name);
+    /* exit foreign mode at integration points */
+    if (
+        elem.parent
+        && ([
+              'mi',
+              'mo',
+              'mn',
+              'ms',
+              'mtext',
+              'annotation-xml',
+              'foreignObject',
+              'desc',
+              'title'
+            ].indexOf(elem.parent.name) >= 0
+        )
+    )
+      opts = Object.assign({}, opts, { xmlMode: false });
+  }
+  if (
+      (!opts.xmlMode) 
+      && (['svg', 'math'].indexOf(elem.name) >= 0)
+  ) {
+    opts = Object.assign({}, opts, { xmlMode: 'foreign' });
+  }
 
   var tag = '<' + elem.name,
       attribs = formatAttrs(elem.attribs, opts);
