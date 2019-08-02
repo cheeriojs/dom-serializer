@@ -32,5 +32,8 @@
   "scripts": {
     "test": "mocha test.js"
   },
+  "prettier": {
+    "singleQuote": true
+  },
   "license": "MIT"
 }

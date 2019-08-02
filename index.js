@@ -30,8 +30,8 @@ var unencodedElements = {
 function formatAttrs(attributes, opts) {
   if (!attributes) return;
 
-  var output = '',
-      value;
+  var output = '';
+  var value;
 
   // Loop through the attributes
   for (var key in attributes) {
@@ -40,14 +40,18 @@ function formatAttrs(attributes, opts) {
       output += ' ';
     }
 
-    if ((opts.xmlMode === 'foreign')) {
+    if (opts.xmlMode === 'foreign') {
       /* fix up mixed-case attribute names */
-      key = (foreignNames.attributeNames[key] || key);
+      key = foreignNames.attributeNames[key] || key;
     }
     output += key;
     if ((value !== null && value !== '') || opts.xmlMode) {
-        output += '="' + (opts.decodeEntities ? entities.encodeXML(value) :
-                            value.replace(/\"/g, '&quot;')) + '"';
+      output +=
+        '="' +
+        (opts.decodeEntities
+          ? entities.encodeXML(value)
+          : value.replace(/\"/g, '&quot;')) +
+        '"';
     }
   }
 
@@ -77,77 +81,66 @@ var singleTag = {
   param: true,
   source: true,
   track: true,
-  wbr: true,
+  wbr: true
 };
 
-
-var render = module.exports = function(dom, opts) {
+var render = (module.exports = function(dom, opts) {
   if (!Array.isArray(dom) && !dom.cheerio) dom = [dom];
   opts = opts || {};
 
   var output = '';
 
-  for(var i = 0; i < dom.length; i++){
+  for (var i = 0; i < dom.length; i++) {
     var elem = dom[i];
 
-    if (elem.type === 'root')
-      output += render(elem.children, opts);
-    else if (ElementType.isTag(elem))
-      output += renderTag(elem, opts);
+    if (elem.type === 'root') output += render(elem.children, opts);
+    else if (ElementType.isTag(elem)) output += renderTag(elem, opts);
     else if (elem.type === ElementType.Directive)
       output += renderDirective(elem);
-    else if (elem.type === ElementType.Comment)
-      output += renderComment(elem);
-    else if (elem.type === ElementType.CDATA)
-      output += renderCdata(elem);
-    else
-      output += renderText(elem, opts);
+    else if (elem.type === ElementType.Comment) output += renderComment(elem);
+    else if (elem.type === ElementType.CDATA) output += renderCdata(elem);
+    else output += renderText(elem, opts);
   }
 
   return output;
-};
+});
+
+const foreignModeIntegrationPoints = [
+  'mi',
+  'mo',
+  'mn',
+  'ms',
+  'mtext',
+  'annotation-xml',
+  'foreignObject',
+  'desc',
+  'title'
+];
 
 function renderTag(elem, opts) {
   // Handle SVG / MathML in HTML
-  if ((opts.xmlMode === 'foreign')) {
+  if (opts.xmlMode === 'foreign') {
     /* fix up mixed-case element names */
-    elem.name = (foreignNames.elementNames[elem.name] || elem.name);
+    elem.name = foreignNames.elementNames[elem.name] || elem.name;
     /* exit foreign mode at integration points */
     if (
-        elem.parent
-        && ([
-              'mi',
-              'mo',
-              'mn',
-              'ms',
-              'mtext',
-              'annotation-xml',
-              'foreignObject',
-              'desc',
-              'title'
-            ].indexOf(elem.parent.name) >= 0
-        )
+      elem.parent &&
+      foreignModeIntegrationPoints.indexOf(elem.parent.name) >= 0
     )
       opts = Object.assign({}, opts, { xmlMode: false });
   }
-  if (
-      (!opts.xmlMode) 
-      && (['svg', 'math'].indexOf(elem.name) >= 0)
-  ) {
+  if (!opts.xmlMode && ['svg', 'math'].indexOf(elem.name) >= 0) {
     opts = Object.assign({}, opts, { xmlMode: 'foreign' });
   }
 
-  var tag = '<' + elem.name,
-      attribs = formatAttrs(elem.attribs, opts);
+  var tag = '<' + elem.name;
+  var attribs = formatAttrs(elem.attribs, opts);
 
   if (attribs) {
     tag += ' ' + attribs;
   }
 
-  if (
-    opts.xmlMode
-    && (!elem.children || elem.children.length === 0)
-  ) {
+  if (opts.xmlMode && (!elem.children || elem.children.length === 0)) {
     tag += '/>';
   } else {
     tag += '>';
@@ -171,7 +164,10 @@ function renderText(elem, opts) {
   var data = elem.data || '';
 
   // if entities weren't decoded, no need to encode them back
-  if (opts.decodeEntities && !(elem.parent && elem.parent.name in unencodedElements)) {
+  if (
+    opts.decodeEntities &&
+    !(elem.parent && elem.parent.name in unencodedElements)
+  ) {
     data = entities.encodeXML(data);
   }
 
