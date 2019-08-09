@@ -37,14 +37,20 @@ function escapeHTML(str) {
 }
 
 function escape(str, opts) {
-  // After cheerio 1.0.0-RC3, parser API has changed.
-  // When xmlMode is true, cheerio uses `htmlparser2`,
+  // After cheerio 1.0.0-RC3, parser API has been changed.
+  // When xmlMode or _useHtmlParser2 is true, cheerio uses `htmlparser2`,
   // if `decodeEntities` is false, `htmlparser2` won't decode `&lt;`.
   // When xmlMode is false, cheerio uses `parse5`, which by default
   // decode all entities like `&lt;` and does not support `decodeEntities`,
   // so we need to escape before output.
-  return opts.xmlMode
-    ? (opts.decodeEntities ? entities.encodeXML(str) : str)
+  // Plus, there is a corner case,
+  // when using htmlparser2 with decodeEntities: false,
+  // we need to escape double quote,
+  // because dom-serializer always use double quote for attributes.
+  return opts.xmlMode || opts._useHtmlParser2
+    ? (opts.decodeEntities
+      ? entities.encodeXML(str) :
+      str.replace(/"/g, "&quot;"))
     : escapeHTML(str);
 }
 
