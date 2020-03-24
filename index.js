@@ -9,8 +9,6 @@ var entities = require('entities');
    https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inforeign
 */
 var foreignNames = require('./foreignNames.json');
-foreignNames.elementNames.__proto__ = null; /* use as a simple dictionary */
-foreignNames.attributeNames.__proto__ = null;
 
 var unencodedElements = {
   __proto__: null,
