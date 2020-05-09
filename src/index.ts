@@ -13,6 +13,7 @@ import { elementNames, attributeNames } from "./foreignNames";
 
 export interface DomSerializerOptions {
   emptyAttrs?: boolean;
+  selfClosingTags?: boolean;
   xmlMode?: boolean | "foreign";
   decodeEntities?: boolean;
 }
@@ -167,7 +168,15 @@ function renderTag(elem: Element, opts: DomSerializerOptions) {
     tag += ` ${attribs}`;
   }
 
-  if (opts.xmlMode && (!elem.children || elem.children.length === 0)) {
+  if (
+    (!elem.children || elem.children.length === 0) &&
+    (opts.xmlMode
+      ? // in XML mode or foreign mode, and user hasn't explicitly turned off self-closing tags
+        opts.selfClosingTags !== false
+      : // user explicitly asked for self-closing tags, even in HTML mode
+        opts.selfClosingTags && singleTag.has(elem.name))
+  ) {
+    if (!opts.xmlMode) tag += " ";
     tag += "/>";
   } else {
     tag += ">";
@@ -175,7 +184,7 @@ function renderTag(elem: Element, opts: DomSerializerOptions) {
       tag += render(elem.children, opts);
     }
 
-    if (!singleTag.has(elem.name) || opts.xmlMode) {
+    if (opts.xmlMode || !singleTag.has(elem.name)) {
       tag += `</${elem.name}>`;
     }
   }

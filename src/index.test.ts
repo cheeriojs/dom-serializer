@@ -11,6 +11,7 @@ type CheerioOptions = {
   normalizeWhitespace?: boolean;
   decodeEntities?: boolean;
   emptyAttrs?: boolean;
+  selfClosingTags?: boolean;
 };
 
 function html(
@@ -88,8 +89,50 @@ describe("render DOM parsed with htmlparser2", () => {
   });
 });
 
-function testBody(html: (input: string, opts?: CheerioOptions) => string) {
+describe("(xml, {selfClosingTags: false})", () => {
+  it("should render childless nodes with an explicit closing tag", () => {
+    const str = "<foo /><bar></bar>";
+    expect(xml(str, { selfClosingTags: false })).toStrictEqual(
+      "<foo></foo><bar></bar>"
+    );
+  });
+});
+
+describe("(html, {selfClosingTags: true})", () => {
   it("should render <br /> tags correctly", () => {
+    const str = "<br />";
+    expect(
+      html(
+        {
+          _useHtmlParser2: true,
+          decodeEntities: false,
+          selfClosingTags: true,
+        },
+        str
+      )
+    ).toStrictEqual(str);
+  });
+});
+
+describe("(html, {selfClosingTags: false})", () => {
+  it("should render childless SVG nodes with an explicit closing tag", () => {
+    const str =
+      '<svg><circle x="12" y="12"></circle><path d="123M"></path><polygon points="60,20 100,40 100,80 60,100 20,80 20,40"></polygon></svg>';
+    expect(
+      html(
+        {
+          _useHtmlParser2: true,
+          decodeEntities: false,
+          selfClosingTags: false,
+        },
+        str
+      )
+    ).toStrictEqual(str);
+  });
+});
+
+function testBody(html: (input: string, opts?: CheerioOptions) => string) {
+  it("should render <br /> tags without a slash", () => {
     const str = "<br />";
     expect(html(str)).toStrictEqual("<br>");
   });
