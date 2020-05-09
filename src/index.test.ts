@@ -10,6 +10,7 @@ type CheerioOptions = {
   _useHtmlParser2?: boolean;
   normalizeWhitespace?: boolean;
   decodeEntities?: boolean;
+  emptyAttrs?: boolean;
 };
 
 function html(
@@ -103,6 +104,11 @@ function testBody(html: (input: string, opts?: CheerioOptions) => string) {
   it('should shorten the "checked" attribute when it contains the value "checked"', () => {
     const str = "<input checked/>";
     expect(html(str)).toStrictEqual("<input checked>");
+  });
+
+  it("should render empty attributes if asked for", () => {
+    const str = "<input checked/>";
+    expect(html(str, { emptyAttrs: true })).toStrictEqual('<input checked="">');
   });
 
   it('should not shorten the "name" attribute when it contains the value "name"', () => {

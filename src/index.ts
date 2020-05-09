@@ -12,6 +12,7 @@ import entities from "entities";
 import { elementNames, attributeNames } from "./foreignNames";
 
 export interface DomSerializerOptions {
+  emptyAttrs?: boolean;
   xmlMode?: boolean | "foreign";
   decodeEntities?: boolean;
 }
@@ -45,7 +46,11 @@ function formatAttributes(
         key = attributeNames.get(key) ?? key;
       }
 
-      if (!opts.xmlMode && (value === null || value === "")) {
+      if (
+        !opts.emptyAttrs &&
+        !opts.xmlMode &&
+        (value === null || value === "")
+      ) {
         return key;
       }
 
@@ -95,7 +100,7 @@ export default function render(
   node: Node | Node[],
   options: DomSerializerOptions = {}
 ): string {
-  // TODO: This is a bit ugly
+  // TODO: This is a bit hacky.
   const nodes: Node[] =
     Array.isArray(node) || (node as any).cheerio ? (node as Node[]) : [node];
 
@@ -137,6 +142,8 @@ const foreignModeIntegrationPoints = new Set([
   "title",
 ]);
 
+const foreignElements = new Set(["svg", "math"]);
+
 function renderTag(elem: Element, opts: DomSerializerOptions) {
   // Handle SVG / MathML in HTML
   if (opts.xmlMode === "foreign") {
@@ -149,7 +156,7 @@ function renderTag(elem: Element, opts: DomSerializerOptions) {
     )
       opts = { ...opts, xmlMode: false };
   }
-  if (!opts.xmlMode && ["svg", "math"].indexOf(elem.name) >= 0) {
+  if (!opts.xmlMode && foreignElements.has(elem.name)) {
     opts = { ...opts, xmlMode: "foreign" };
   }
 
