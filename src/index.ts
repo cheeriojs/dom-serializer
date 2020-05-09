@@ -3,7 +3,7 @@
 */
 import * as ElementType from "domelementtype";
 import { Node, NodeWithChildren, Element, DataNode } from "domhandler";
-import entities from "entities";
+import * as entities from "entities";
 
 /* mixed-case SVG and MathML tags & attributes
    recognized by the HTML parser, see
