@@ -51,5 +51,6 @@
     "preset": "ts-jest",
     "testEnvironment": "node"
   },
+  "funding": "https://github.com/cheeriojs/dom-serializer?sponsor=1",
   "license": "MIT"
 }
