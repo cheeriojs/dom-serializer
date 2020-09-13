@@ -1,14 +1,15 @@
 /*
-  Module dependencies
-*/
+ * Module dependencies
+ */
 import * as ElementType from "domelementtype";
-import { Node, NodeWithChildren, Element, DataNode } from "domhandler";
-import * as entities from "entities";
+import type { Node, NodeWithChildren, Element, DataNode } from "domhandler";
+import { encodeXML } from "entities";
 
-/* mixed-case SVG and MathML tags & attributes
-   recognized by the HTML parser, see
-   https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inforeign
-*/
+/*
+ * Mixed-case SVG and MathML tags & attributes
+ * recognized by the HTML parser, see
+ * https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inforeign
+ */
 import { elementNames, attributeNames } from "./foreignNames";
 
 export interface DomSerializerOptions {
@@ -29,44 +30,38 @@ const unencodedElements = new Set([
   "noscript",
 ]);
 
-/*
-  Format attributes
-*/
+/**
+ * Format attributes
+ */
 function formatAttributes(
-  attributes: Record<string, string> | undefined,
+  attributes: Record<string, string | null> | undefined,
   opts: DomSerializerOptions
 ) {
   if (!attributes) return;
 
   return Object.keys(attributes)
     .map((key) => {
-      const value = attributes[key];
+      const value = attributes[key] ?? "";
 
       if (opts.xmlMode === "foreign") {
-        /* fix up mixed-case attribute names */
+        /* Fix up mixed-case attribute names */
         key = attributeNames.get(key) ?? key;
       }
 
-      if (
-        !opts.emptyAttrs &&
-        !opts.xmlMode &&
-        (value === null || value === "")
-      ) {
+      if (!opts.emptyAttrs && !opts.xmlMode && value === "") {
         return key;
       }
 
       return `${key}="${
-        opts.decodeEntities
-          ? entities.encodeXML(value)
-          : value.replace(/"/g, "&quot;")
+        opts.decodeEntities ? encodeXML(value) : value.replace(/"/g, "&quot;")
       }"`;
     })
     .join(" ");
 }
 
-/*
-  Self-enclosing tags
-*/
+/**
+ * Self-enclosing tags
+ */
 const singleTag = new Set([
   "area",
   "base",
@@ -148,14 +143,15 @@ const foreignElements = new Set(["svg", "math"]);
 function renderTag(elem: Element, opts: DomSerializerOptions) {
   // Handle SVG / MathML in HTML
   if (opts.xmlMode === "foreign") {
-    /* fix up mixed-case element names */
+    /* Fix up mixed-case element names */
     elem.name = elementNames.get(elem.name) ?? elem.name;
-    /* exit foreign mode at integration points */
+    /* Exit foreign mode at integration points */
     if (
       elem.parent &&
       foreignModeIntegrationPoints.has((elem.parent as Element).name)
-    )
+    ) {
       opts = { ...opts, xmlMode: false };
+    }
   }
   if (!opts.xmlMode && foreignElements.has(elem.name)) {
     opts = { ...opts, xmlMode: "foreign" };
@@ -169,18 +165,18 @@ function renderTag(elem: Element, opts: DomSerializerOptions) {
   }
 
   if (
-    (!elem.children || elem.children.length === 0) &&
+    elem.children.length === 0 &&
     (opts.xmlMode
-      ? // in XML mode or foreign mode, and user hasn't explicitly turned off self-closing tags
+      ? // In XML mode or foreign mode, and user hasn't explicitly turned off self-closing tags
         opts.selfClosingTags !== false
-      : // user explicitly asked for self-closing tags, even in HTML mode
+      : // User explicitly asked for self-closing tags, even in HTML mode
         opts.selfClosingTags && singleTag.has(elem.name))
   ) {
     if (!opts.xmlMode) tag += " ";
     tag += "/>";
   } else {
     tag += ">";
-    if (elem.children) {
+    if (elem.children.length > 0) {
       tag += render(elem.children, opts);
     }
 
@@ -199,12 +195,12 @@ function renderDirective(elem: DataNode) {
 function renderText(elem: DataNode, opts: DomSerializerOptions) {
   let data = elem.data || "";
 
-  // if entities weren't decoded, no need to encode them back
+  // If entities weren't decoded, no need to encode them back
   if (
     opts.decodeEntities &&
     !(elem.parent && unencodedElements.has((elem.parent as Element).name))
   ) {
-    data = entities.encodeXML(data);
+    data = encodeXML(data);
   }
 
   return data;

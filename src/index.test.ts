@@ -1,18 +1,17 @@
 import cheerio from "cheerio";
-// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-// @ts-ignore
+// @ts-expect-error Module does not have types for now
 import parse from "cheerio/lib/parse";
 import render from "./index";
 
 const defaultOpts = cheerio.prototype.options;
 
-type CheerioOptions = {
+interface CheerioOptions {
   _useHtmlParser2?: boolean;
   normalizeWhitespace?: boolean;
   decodeEntities?: boolean;
   emptyAttrs?: boolean;
   selfClosingTags?: boolean;
-};
+}
 
 function html(
   preset: CheerioOptions,
@@ -31,11 +30,13 @@ function xml(str: string, options: CheerioOptions = {}) {
 }
 
 describe("render DOM parsed with htmlparser2", () => {
-  // only test applicable to the default setup
+  // Only test applicable to the default setup
   describe("(html)", () => {
     const htmlFunc = html.bind(null, { _useHtmlParser2: true });
-    // it doesn't really make sense for {decodeEntities: false}
-    // since currently it will convert <hr class='blah'> into <hr class="blah"> anyway.
+    /*
+     * It doesn't really make sense for {decodeEntities: false}
+     * since currently it will convert <hr class='blah'> into <hr class="blah"> anyway.
+     */
     it("should handle double quotes within single quoted attributes properly", () => {
       const str = "<hr class='an \"edge\" case' />";
       expect(htmlFunc(str)).toStrictEqual(
@@ -44,13 +45,13 @@ describe("render DOM parsed with htmlparser2", () => {
     });
   });
 
-  // run html with default options
+  // Run html with default options
   describe(
     "(html, {})",
     testBody.bind(null, html.bind(null, { _useHtmlParser2: true }))
   );
 
-  // run html with turned off decodeEntities
+  // Run html with turned off decodeEntities
   describe(
     "(html, {decodeEntities: false})",
     testBody.bind(
