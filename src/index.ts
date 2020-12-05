@@ -110,19 +110,22 @@ export default function render(
 }
 
 function renderNode(node: Node, options: DomSerializerOptions): string {
-  switch (node.type as string) {
-    case "root":
+  switch (node.type) {
+    case ElementType.Root:
       return render((node as NodeWithChildren).children, options);
     case ElementType.Directive:
+    case ElementType.Doctype:
       return renderDirective(node as DataNode);
     case ElementType.Comment:
       return renderComment(node as DataNode);
     case ElementType.CDATA:
       return renderCdata(node as NodeWithChildren);
-    default:
-      return ElementType.isTag(node)
-        ? renderTag(node as Element, options)
-        : renderText(node as DataNode, options);
+    case ElementType.Script:
+    case ElementType.Style:
+    case ElementType.Tag:
+      return renderTag(node as Element, options);
+    case ElementType.Text:
+      return renderText(node as DataNode, options);
   }
 }
 
