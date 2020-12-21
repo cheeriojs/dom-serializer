@@ -53,7 +53,9 @@ function formatAttributes(
       }
 
       return `${key}="${
-        opts.decodeEntities ? encodeXML(value) : value.replace(/"/g, "&quot;")
+        opts.decodeEntities !== false
+          ? encodeXML(value)
+          : value.replace(/"/g, "&quot;")
       }"`;
     })
     .join(" ");
@@ -200,7 +202,7 @@ function renderText(elem: DataNode, opts: DomSerializerOptions) {
 
   // If entities weren't decoded, no need to encode them back
   if (
-    opts.decodeEntities &&
+    opts.decodeEntities !== false &&
     !(elem.parent && unencodedElements.has((elem.parent as Element).name))
   ) {
     data = encodeXML(data);
