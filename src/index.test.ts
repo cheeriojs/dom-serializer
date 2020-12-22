@@ -87,6 +87,17 @@ describe("render DOM parsed with htmlparser2", () => {
       const str = '<svg viewBox="0 0 8 8"><radialGradient/></svg>';
       expect(xml(str)).toStrictEqual(str);
     });
+
+    it("should encode entities in otherwise special tags", () => {
+      expect(xml('<script>"<br/>"</script>')).toStrictEqual(
+        "<script>&quot;<br/>&quot;</script>"
+      );
+    });
+
+    it("should not encode entities if disabled", () => {
+      const str = '<script>"<br/>"</script>';
+      expect(xml(str, { decodeEntities: false })).toStrictEqual(str);
+    });
   });
 });
 
