@@ -203,6 +203,11 @@ function testBody(html: (input: string, opts?: CheerioOptions) => string) {
     expect(html(str)).toStrictEqual(str);
   });
 
+  it("should not encode tags in script tag", () => {
+    const str = '<script>"<br>"</script>';
+    expect(html(str)).toStrictEqual(str);
+  });
+
   it("should not encode json data", () => {
     const str =
       '<script>var json = {"simple_value": "value", "value_with_tokens": "&quot;here & \'there\'&quot;"};</script>';
