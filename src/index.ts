@@ -122,12 +122,14 @@ const singleTag = new Set([
  * @param options Changes serialization behavior
  */
 export default function render(
-  node: Node | Node[],
+  node: Node | ArrayLike<Node>,
   options: DomSerializerOptions = {}
 ): string {
   // TODO: This is a bit hacky.
-  const nodes: Node[] =
-    Array.isArray(node) || (node as any).cheerio ? (node as Node[]) : [node];
+  const nodes: ArrayLike<Node> =
+    Array.isArray(node) || (node as any).cheerio
+      ? (node as ArrayLike<Node>)
+      : [node as Node];
 
   let output = "";
 
