@@ -125,11 +125,7 @@ export default function render(
   node: Node | ArrayLike<Node>,
   options: DomSerializerOptions = {}
 ): string {
-  // TODO: This is a bit hacky.
-  const nodes: ArrayLike<Node> =
-    Array.isArray(node) || (node as any).cheerio
-      ? (node as ArrayLike<Node>)
-      : [node as Node];
+  const nodes: ArrayLike<Node> = "length" in node ? node : [node];
 
   let output = "";
 
