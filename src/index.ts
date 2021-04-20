@@ -26,8 +26,8 @@ export interface DomSerializerOptions {
    * Print self-closing tags for tags without contents.
    *
    * @default xmlMode
-   * @example With <code>emptyAttrs: false</code>: <code>&lt;foo&gt;&lt;/foo&gt;</code>
-   * @example With <code>emptyAttrs: true</code>: <code>&lt;foo /&gt;</code>
+   * @example With <code>selfClosingTags: false</code>: <code>&lt;foo&gt;&lt;/foo&gt;</code>
+   * @example With <code>selfClosingTags: true</code>: <code>&lt;foo /&gt;</code>
    */
   selfClosingTags?: boolean;
   /**
