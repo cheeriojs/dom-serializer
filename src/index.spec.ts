@@ -1,5 +1,4 @@
 import cheerio from "cheerio";
-// @ts-expect-error Module does not have types for now
 import parse from "cheerio/lib/parse";
 import render from "./index";
 
@@ -19,13 +18,13 @@ function html(
   options: CheerioOptions = {}
 ) {
   const opts = { ...defaultOpts, ...preset, ...options };
-  const dom = parse(str, opts);
+  const dom = parse(str, opts, true);
   return render(dom, opts);
 }
 
 function xml(str: string, options: CheerioOptions = {}) {
   const opts = { ...defaultOpts, ...options, xmlMode: true };
-  const dom = parse(str, opts);
+  const dom = parse(str, opts, true);
   return render(dom, opts);
 }
 
