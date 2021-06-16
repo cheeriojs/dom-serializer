@@ -19,7 +19,7 @@
     "lib/**/*"
   ],
   "dependencies": {
-    "domelementtype": "^2.0.1",
+    "domelementtype": "^2.2.0",
     "domhandler": "^4.2.0",
     "entities": "^2.0.0"
   },
