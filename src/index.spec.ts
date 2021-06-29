@@ -260,4 +260,9 @@ function testBody(html: (input: string, opts?: CheerioOptions) => string) {
     const str = '<iframe src="test"></iframe>';
     expect(html(str)).toStrictEqual(str);
   });
+
+  it("should encode double quotes in attribute", () => {
+    const str = `<img src="/" alt='title" onerror="alert(1)" label="x'>`;
+    expect(html(str)).toStrictEqual('<img src="/" alt="title&quot; onerror=&quot;alert(1)&quot; label=&quot;x">');
+  });
 }
