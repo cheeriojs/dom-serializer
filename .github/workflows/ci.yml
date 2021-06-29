@@ -45,8 +45,12 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
-      - name: Run Jest with coverage
+      - name: Run Jest
         run: npm run test
+        if: matrix.node != env.NODE_COV
+
+      - name: Run Jest with coverage
+        run: npm run test:jest -- --coverage
         if: matrix.node == env.NODE_COV
 
       - name: Run Coveralls
