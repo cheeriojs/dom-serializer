@@ -1,21 +1,12 @@
 version: 2
 updates:
-- package-ecosystem: npm
-  directory: "/"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-  ignore:
-  - dependency-name: "@types/node"
-    versions:
-    - 15.0.0
-  - dependency-name: "@types/jest"
-    versions:
-    - 26.0.21
-  - dependency-name: "@types/cheerio"
-    versions:
-    - 0.22.26
-    - 0.22.27
-  - dependency-name: eslint-config-prettier
-    versions:
-    - 8.0.0
+    - package-ecosystem: npm
+      directory: "/"
+      schedule:
+          interval: daily
+      open-pull-requests-limit: 10
+      versioning-strategy: increase
+    - package-ecosystem: "github-actions"
+      directory: "/"
+      schedule:
+          interval: daily
