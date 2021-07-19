@@ -29,7 +29,7 @@
     "@typescript-eslint/eslint-plugin": "^4.28.3",
     "@typescript-eslint/parser": "^4.28.3",
     "cheerio": "^1.0.0-rc.9",
-    "eslint": "^7.30.0",
+    "eslint": "^7.31.0",
     "eslint-config-prettier": "^8.3.0",
     "htmlparser2": "^6.1.0",
     "jest": "^27.0.1",
