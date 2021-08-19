@@ -11,7 +11,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/cheeriojs/dom-renderer.git"
+    "url": "git://github.com/cheeriojs/dom-serializer.git"
   },
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
