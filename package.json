@@ -1,6 +1,6 @@
 {
   "name": "@frank-mayer/dom-serializer",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "render domhandler DOM nodes to a string",
   "author": "Frank Mayer <mail@frank-mayer.io>",
   "sideEffects": false,
