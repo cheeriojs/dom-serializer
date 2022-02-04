@@ -1,8 +1,8 @@
 {
-  "name": "dom-serializer",
-  "version": "1.3.2",
+  "name": "@frank-mayer/dom-serializer",
+  "version": "2.0.0",
   "description": "render domhandler DOM nodes to a string",
-  "author": "Felix Boehm <me@feedic.com>",
+  "author": "Frank Mayer <mail@frank-mayer.io>",
   "sideEffects": false,
   "keywords": [
     "html",
@@ -11,7 +11,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/cheeriojs/dom-serializer.git"
+    "url": "git://github.com/Frank-Mayer/dom-serializer.git"
   },
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -49,6 +49,5 @@
     "preset": "ts-jest",
     "testEnvironment": "node"
   },
-  "funding": "https://github.com/cheeriojs/dom-serializer?sponsor=1",
   "license": "MIT"
 }

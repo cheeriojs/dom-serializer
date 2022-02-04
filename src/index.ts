@@ -121,10 +121,10 @@ const singleTag = new Set([
  * @param node Node to be rendered.
  * @param options Changes serialization behavior
  */
-export default function render(
+export const render = (
   node: Node | ArrayLike<Node>,
   options: DomSerializerOptions = {}
-): string {
+): string => {
   const nodes: ArrayLike<Node> = "length" in node ? node : [node];
 
   let output = "";
@@ -134,7 +134,7 @@ export default function render(
   }
 
   return output;
-}
+};
 
 function renderNode(node: Node, options: DomSerializerOptions): string {
   switch (node.type) {
