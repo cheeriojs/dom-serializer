@@ -1,13 +1,17 @@
-# dom-serializer [![Build Status](https://travis-ci.com/cheeriojs/dom-serializer.svg?branch=master)](https://travis-ci.com/cheeriojs/dom-serializer)
+# dom-serializer
 
-Renders a [domhandler](https://github.com/fb55/domhandler) DOM node or an array of domhandler DOM nodes to a string.
+fork of [@cheeriojs](https://github.com/cheeriojs)[/dom-serializer](https://github.com/cheeriojs/dom-serializer)
 
-```js
-import render from "dom-serializer";
+The original package does not work if you are using ES6 modules: [Issue 612](https://github.com/cheeriojs/dom-serializer/issues/612)
 
-// OR
+<hr/>
 
-const render = require("dom-serializer").default;
+Renders a [`domhandler`](https://github.com/fb55/domhandler) DOM node or an array of domhandler DOM nodes to a string.
+
+```ts
+import { render } from "dom-serializer";
+
+const html: string = render(dom);
 ```
 
 # API
@@ -49,9 +53,9 @@ Print an empty attribute's value.
 
 **`default`** xmlMode
 
-**`example`** With <code>emptyAttrs: false</code>: <code>&lt;input checked&gt;</code>
+**`example`** With `emptyAttrs: false`: `&lt;input checked&gt;`
 
-**`example`** With <code>emptyAttrs: true</code>: <code>&lt;input checked=""&gt;</code>
+**`example`** With `emptyAttrs: true`: `&lt;input checked=""&gt;`
 
 ---
 
@@ -63,9 +67,9 @@ Print self-closing tags for tags without contents.
 
 **`default`** xmlMode
 
-**`example`** With <code>selfClosingTags: false</code>: <code>&lt;foo&gt;&lt;/foo&gt;</code>
+**`example`** With `selfClosingTags: false`: `&lt;foo&gt;&lt;/foo&gt;`
 
-**`example`** With <code>selfClosingTags: true</code>: <code>&lt;foo /&gt;</code>
+**`example`** With `selfClosingTags: true`: `&lt;foo /&gt;`
 
 ---
 
