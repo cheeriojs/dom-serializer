@@ -2,7 +2,14 @@
  * Module dependencies
  */
 import * as ElementType from "domelementtype";
-import type { Node, NodeWithChildren, Element, DataNode } from "domhandler";
+import type {
+  AnyNode,
+  Element,
+  ProcessingInstruction,
+  Comment,
+  Text,
+  CDATA,
+} from "domhandler";
 import { encodeXML } from "entities";
 
 /**
@@ -122,10 +129,10 @@ const singleTag = new Set([
  * @param options Changes serialization behavior
  */
 export default function render(
-  node: Node | ArrayLike<Node>,
+  node: AnyNode | ArrayLike<AnyNode>,
   options: DomSerializerOptions = {}
 ): string {
-  const nodes: ArrayLike<Node> = "length" in node ? node : [node];
+  const nodes: ArrayLike<AnyNode> = "length" in node ? node : [node];
 
   let output = "";
 
@@ -136,23 +143,24 @@ export default function render(
   return output;
 }
 
-function renderNode(node: Node, options: DomSerializerOptions): string {
+function renderNode(node: AnyNode, options: DomSerializerOptions): string {
   switch (node.type) {
     case ElementType.Root:
-      return render((node as NodeWithChildren).children, options);
-    case ElementType.Directive:
+      return render(node.children, options);
+    // @ts-expect-error We don't use `Doctype` yet
     case ElementType.Doctype:
-      return renderDirective(node as DataNode);
+    case ElementType.Directive:
+      return renderDirective(node);
     case ElementType.Comment:
-      return renderComment(node as DataNode);
+      return renderComment(node);
     case ElementType.CDATA:
-      return renderCdata(node as NodeWithChildren);
+      return renderCdata(node);
     case ElementType.Script:
     case ElementType.Style:
     case ElementType.Tag:
-      return renderTag(node as Element, options);
+      return renderTag(node, options);
     case ElementType.Text:
-      return renderText(node as DataNode, options);
+      return renderText(node, options);
   }
 }
 
@@ -218,11 +226,11 @@ function renderTag(elem: Element, opts: DomSerializerOptions) {
   return tag;
 }
 
-function renderDirective(elem: DataNode) {
+function renderDirective(elem: ProcessingInstruction) {
   return `<${elem.data}>`;
 }
 
-function renderText(elem: DataNode, opts: DomSerializerOptions) {
+function renderText(elem: Text, opts: DomSerializerOptions) {
   let data = elem.data || "";
 
   // If entities weren't decoded, no need to encode them back
@@ -240,10 +248,10 @@ function renderText(elem: DataNode, opts: DomSerializerOptions) {
   return data;
 }
 
-function renderCdata(elem: NodeWithChildren) {
-  return `<![CDATA[${(elem.children[0] as DataNode).data}]]>`;
+function renderCdata(elem: CDATA) {
+  return `<![CDATA[${(elem.children[0] as Text).data}]]>`;
 }
 
-function renderComment(elem: DataNode) {
+function renderComment(elem: Comment) {
   return `<!--${elem.data}-->`;
 }
