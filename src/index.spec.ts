@@ -1,17 +1,13 @@
 import cheerio from "cheerio";
 import parse from "cheerio/lib/parse";
-import render from "./index";
+import render, { DomSerializerOptions } from "./index";
 // TODO: We need to temporarily override the Document type
 import type { Document } from "domhandler";
 
 const defaultOpts = cheerio.prototype.options;
 
-interface CheerioOptions {
+interface CheerioOptions extends DomSerializerOptions {
   _useHtmlParser2?: boolean;
-  normalizeWhitespace?: boolean;
-  decodeEntities?: boolean;
-  emptyAttrs?: boolean;
-  selfClosingTags?: boolean;
 }
 
 function html(
@@ -45,11 +41,11 @@ describe("render DOM parsed with htmlparser2", () => {
       );
     });
 
-    it("should escape entities by default", () => {
+    it("should escape entities to utf8 if requested", () => {
       const str = '<a href="a < b &quot; & c">& " &lt; &gt;</a>';
-      expect(htmlFunc(str)).toStrictEqual(
-        '<a href="a < b &quot; &amp; c">&amp; " &lt; &gt;</a>'
-      );
+      expect(
+        html({ _useHtmlParser2: true, encodeEntities: "utf8" }, str)
+      ).toStrictEqual('<a href="a < b &quot; &amp; c">&amp; " &lt; &gt;</a>');
     });
   });
 
@@ -192,13 +188,6 @@ function testBody(html: (input: string, opts?: CheerioOptions) => string) {
   it("should render whitespace by default", () => {
     const str = '<a href="./haha.html">hi</a> <a href="./blah.html">blah</a>';
     expect(html(str)).toStrictEqual(str);
-  });
-
-  it("should normalize whitespace if specified", () => {
-    const str = '<a href="./haha.html">hi</a> <a href="./blah.html">blah  </a>';
-    expect(html(str, { normalizeWhitespace: true })).toStrictEqual(
-      '<a href="./haha.html">hi</a> <a href="./blah.html">blah </a>'
-    );
   });
 
   it("should preserve multiple hyphens in data attributes", () => {
