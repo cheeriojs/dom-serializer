@@ -18,7 +18,7 @@ import { encodeXML } from "entities";
  *
  * @see https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inforeign
  */
-import { elementNames, attributeNames } from "./foreignNames";
+import { elementNames, attributeNames } from "./foreignNames.js";
 
 export interface DomSerializerOptions {
   /**
@@ -128,11 +128,11 @@ const singleTag = new Set([
  * @param node Node to be rendered.
  * @param options Changes serialization behavior
  */
-export default function render(
+export function render(
   node: AnyNode | ArrayLike<AnyNode>,
   options: DomSerializerOptions = {}
 ): string {
-  const nodes: ArrayLike<AnyNode> = "length" in node ? node : [node];
+  const nodes = "length" in node ? node : [node];
 
   let output = "";
 
@@ -142,6 +142,8 @@ export default function render(
 
   return output;
 }
+
+export default render;
 
 function renderNode(node: AnyNode, options: DomSerializerOptions): string {
   switch (node.type) {
