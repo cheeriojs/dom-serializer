@@ -1,6 +1,6 @@
 {
   "name": "dom-serializer",
-  "version": "1.4.0",
+  "version": "2.0.0",
   "description": "render domhandler DOM nodes to a string",
   "author": "Felix Boehm <me@feedic.com>",
   "sideEffects": false,
