@@ -44,6 +44,13 @@ describe("render DOM parsed with htmlparser2", () => {
         '<hr class="an &quot;edge&quot; case">'
       );
     });
+
+    it("should escape entities by default", () => {
+      const str = '<a href="a < b &quot; & c">& " &lt; &gt;</a>';
+      expect(htmlFunc(str)).toStrictEqual(
+        '<a href="a < b &quot; &amp; c">&amp; " &lt; &gt;</a>'
+      );
+    });
   });
 
   // Run html with default options

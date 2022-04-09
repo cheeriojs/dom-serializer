@@ -48,7 +48,7 @@ export interface DomSerializerOptions {
   /**
    * Encode characters that are either reserved in HTML or XML.
    *
-   * If the value is `'ascii'`, characters outside of the ASCII range will be encoded as well.
+   * If `xmlMode` is `true` or the value is `'ascii'`, characters outside of the ASCII range will be encoded as well.
    *
    * @default `decodeEntities`
    */
@@ -88,7 +88,7 @@ function formatAttributes(
   const encode =
     (opts.encodeEntities ?? opts.decodeEntities) === false
       ? replaceQuotes
-      : opts.encodeEntities === "ascii"
+      : opts.xmlMode || opts.encodeEntities === "ascii"
       ? encodeXML
       : escapeAttribute;
 
@@ -259,7 +259,10 @@ function renderText(elem: Text, opts: DomSerializerOptions) {
       unencodedElements.has((elem.parent as Element).name)
     )
   ) {
-    data = opts.encodeEntities === "ascii" ? encodeXML(data) : escapeText(data);
+    data =
+      opts.xmlMode || opts.encodeEntities === "ascii"
+        ? encodeXML(data)
+        : escapeText(data);
   }
 
   return data;
