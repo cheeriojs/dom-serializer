@@ -54,7 +54,7 @@ export interface DomSerializerOptions {
    */
   encodeEntities?: boolean | "utf8";
   /**
-   * Option inherited from parsing; will lead to entities being encoded.
+   * Option inherited from parsing; will be used as the default value for `encodeEntities`.
    *
    * @default true
    */
