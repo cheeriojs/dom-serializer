@@ -1,6 +1,8 @@
 import cheerio from "cheerio";
 import parse from "cheerio/lib/parse";
 import render from "./index";
+// TODO: We need to temporarily override the Document type
+import type { Document } from "domhandler";
 
 const defaultOpts = cheerio.prototype.options;
 
@@ -18,13 +20,13 @@ function html(
   options: CheerioOptions = {}
 ) {
   const opts = { ...defaultOpts, ...preset, ...options };
-  const dom = parse(str, opts, true);
+  const dom = parse(str, opts, true) as Document;
   return render(dom, opts);
 }
 
 function xml(str: string, options: CheerioOptions = {}) {
   const opts = { ...defaultOpts, ...options, xmlMode: true };
-  const dom = parse(str, opts, true);
+  const dom = parse(str, opts, true) as Document;
   return render(dom, opts);
 }
 
@@ -263,6 +265,8 @@ function testBody(html: (input: string, opts?: CheerioOptions) => string) {
 
   it("should encode double quotes in attribute", () => {
     const str = `<img src="/" alt='title" onerror="alert(1)" label="x'>`;
-    expect(html(str)).toStrictEqual('<img src="/" alt="title&quot; onerror=&quot;alert(1)&quot; label=&quot;x">');
+    expect(html(str)).toStrictEqual(
+      '<img src="/" alt="title&quot; onerror=&quot;alert(1)&quot; label=&quot;x">'
+    );
   });
 }
