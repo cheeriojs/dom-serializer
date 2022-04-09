@@ -10,7 +10,7 @@ import type {
   Text,
   CDATA,
 } from "domhandler";
-import { encodeXML } from "entities";
+import { encodeXML, escapeAttribute, escapeText } from "entities";
 
 /**
  * Mixed-case SVG and MathML tags & attributes
@@ -46,7 +46,15 @@ export interface DomSerializerOptions {
    */
   xmlMode?: boolean | "foreign";
   /**
-   * Encode characters that are either reserved in HTML or XML, or are outside of the ASCII range.
+   * Encode characters that are either reserved in HTML or XML.
+   *
+   * If the value is `'ascii'`, characters outside of the ASCII range will be encoded as well.
+   *
+   * @default `decodeEntities`
+   */
+  encodeEntities?: boolean | "ascii";
+  /**
+   * Option inherited from parsing; will lead to entities being encoded.
    *
    * @default true
    */
@@ -64,6 +72,10 @@ const unencodedElements = new Set([
   "noscript",
 ]);
 
+function replaceQuotes(value: string): string {
+  return value.replace(/"/g, "&quot;");
+}
+
 /**
  * Format attributes
  */
@@ -72,6 +84,13 @@ function formatAttributes(
   opts: DomSerializerOptions
 ) {
   if (!attributes) return;
+
+  const encode =
+    (opts.encodeEntities ?? opts.decodeEntities) === false
+      ? replaceQuotes
+      : opts.encodeEntities === "ascii"
+      ? encodeXML
+      : escapeAttribute;
 
   return Object.keys(attributes)
     .map((key) => {
@@ -86,11 +105,7 @@ function formatAttributes(
         return key;
       }
 
-      return `${key}="${
-        opts.decodeEntities !== false
-          ? encodeXML(value)
-          : value.replace(/"/g, "&quot;")
-      }"`;
+      return `${key}="${encode(value)}"`;
     })
     .join(" ");
 }
@@ -237,14 +252,14 @@ function renderText(elem: Text, opts: DomSerializerOptions) {
 
   // If entities weren't decoded, no need to encode them back
   if (
-    opts.decodeEntities !== false &&
+    (opts.encodeEntities ?? opts.decodeEntities) !== false &&
     !(
       !opts.xmlMode &&
       elem.parent &&
       unencodedElements.has((elem.parent as Element).name)
     )
   ) {
-    data = encodeXML(data);
+    data = opts.encodeEntities === "ascii" ? encodeXML(data) : escapeText(data);
   }
 
   return data;
