@@ -26,7 +26,7 @@
   "dependencies": {
     "domelementtype": "^2.3.0",
     "domhandler": "^5.0.2",
-    "entities": "^4.2.0"
+    "entities": "^4.3.0"
   },
   "devDependencies": {
     "@types/jest": "^27.4.1",
