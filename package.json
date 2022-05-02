@@ -25,7 +25,7 @@
   ],
   "dependencies": {
     "domelementtype": "^2.3.0",
-    "domhandler": "^5.0.2",
+    "domhandler": "^5.0.3",
     "entities": "^4.3.0"
   },
   "devDependencies": {
