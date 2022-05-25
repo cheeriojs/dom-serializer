@@ -1,10 +1,9 @@
 import cheerio from "cheerio";
-import parse from "cheerio/lib/parse";
 import render, { DomSerializerOptions } from "./index";
 // TODO: We need to temporarily override the Document type
 import type { Document } from "domhandler";
 
-const defaultOpts = cheerio.prototype.options;
+const { _parse: parse, options: defaultOpts } = cheerio.prototype;
 
 interface CheerioOptions extends DomSerializerOptions {
   _useHtmlParser2?: boolean;
