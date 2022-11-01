@@ -74,44 +74,6 @@ const unencodedElements = new Set([
   "noscript",
 ]);
 
-function replaceQuotes(value: string): string {
-  return value.replace(/"/g, "&quot;");
-}
-
-/**
- * Format attributes
- */
-function formatAttributes(
-  attributes: Record<string, string | null> | undefined,
-  opts: DomSerializerOptions
-) {
-  if (!attributes) return;
-
-  const encode =
-    (opts.encodeEntities ?? opts.decodeEntities) === false
-      ? replaceQuotes
-      : opts.xmlMode || opts.encodeEntities !== "utf8"
-      ? encodeXML
-      : escapeAttribute;
-
-  return Object.keys(attributes)
-    .map((key) => {
-      const value = attributes[key] ?? "";
-
-      if (opts.xmlMode === "foreign") {
-        /* Fix up mixed-case attribute names */
-        key = attributeNames.get(key) ?? key;
-      }
-
-      if (!opts.emptyAttrs && !opts.xmlMode && value === "") {
-        return key;
-      }
-
-      return `${key}="${encode(value)}"`;
-    })
-    .join(" ");
-}
-
 /**
  * Self-enclosing tags
  */
@@ -137,52 +99,6 @@ const singleTag = new Set([
   "wbr",
 ]);
 
-/**
- * Renders a DOM node or an array of DOM nodes to a string.
- *
- * Can be thought of as the equivalent of the `outerHTML` of the passed node(s).
- *
- * @param node Node to be rendered.
- * @param options Changes serialization behavior
- */
-export function render(
-  node: AnyNode | ArrayLike<AnyNode>,
-  options: DomSerializerOptions = {}
-): string {
-  const nodes = "length" in node ? node : [node];
-
-  let output = "";
-
-  for (let i = 0; i < nodes.length; i++) {
-    output += renderNode(nodes[i], options);
-  }
-
-  return output;
-}
-
-export default render;
-
-function renderNode(node: AnyNode, options: DomSerializerOptions): string {
-  switch (node.type) {
-    case ElementType.Root:
-      return render(node.children, options);
-    // @ts-expect-error We don't use `Doctype` yet
-    case ElementType.Doctype:
-    case ElementType.Directive:
-      return renderDirective(node);
-    case ElementType.Comment:
-      return renderComment(node);
-    case ElementType.CDATA:
-      return renderCdata(node);
-    case ElementType.Script:
-    case ElementType.Style:
-    case ElementType.Tag:
-      return renderTag(node, options);
-    case ElementType.Text:
-      return renderText(node, options);
-  }
-}
-
 const foreignModeIntegrationPoints = new Set([
   "mi",
   "mo",
@@ -197,83 +113,201 @@ const foreignModeIntegrationPoints = new Set([
 
 const foreignElements = new Set(["svg", "math"]);
 
-function renderTag(elem: Element, opts: DomSerializerOptions) {
-  // Handle SVG / MathML in HTML
-  if (opts.xmlMode === "foreign") {
-    /* Fix up mixed-case element names */
-    elem.name = elementNames.get(elem.name) ?? elem.name;
-    /* Exit foreign mode at integration points */
+export class DomSerializer {
+  protected output: string;
+  protected options: DomSerializerOptions;
+
+  /**
+   * Creates a serializer instance
+   *
+   * @param options Changes serialization behavior
+   */
+  constructor(options: DomSerializerOptions = {}) {
+    this.options = options;
+    this.output = "";
+  }
+
+  /**
+   * Renders a DOM node or an array of DOM nodes to a string.
+   *
+   * Can be thought of as the equivalent of the `outerHTML` of the passed node(s).
+   *
+   * @param node Node to be rendered.
+   */
+  render(node: AnyNode | ArrayLike<AnyNode>): string {
+    const nodes = "length" in node ? node : [node];
+
+    this.output = "";
+
+    for (let i = 0; i < nodes.length; i++) {
+      this.renderNode(nodes[i]);
+    }
+
+    return this.output;
+  }
+
+  renderNode(node: AnyNode): void {
+    switch (node.type) {
+      case ElementType.Root:
+        this.render(node.children);
+        break;
+      // @ts-expect-error We don't use `Doctype` yet
+      case ElementType.Doctype:
+      case ElementType.Directive:
+        this.renderDirective(node);
+        break;
+      case ElementType.Comment:
+        this.renderComment(node);
+        break;
+      case ElementType.CDATA:
+        this.renderCdata(node);
+        break;
+      case ElementType.Script:
+      case ElementType.Style:
+      case ElementType.Tag:
+        this.renderTag(node);
+        break;
+      case ElementType.Text:
+        this.renderText(node);
+        break;
+    }
+  }
+
+  renderTag(elem: Element): void {
+    // Handle SVG / MathML in HTML
+    let xmlModeSwitchedToForeign = false;
+    if (this.options.xmlMode === "foreign") {
+      /* Fix up mixed-case element names */
+      elem.name = elementNames.get(elem.name) ?? elem.name;
+      /* Exit foreign mode at integration points */
+      if (
+        elem.parent &&
+        foreignModeIntegrationPoints.has((elem.parent as Element).name)
+      ) {
+        this.options = { ...this.options, xmlMode: false };
+      }
+    }
+    if (!this.options.xmlMode && foreignElements.has(elem.name)) {
+      this.options = { ...this.options, xmlMode: "foreign" };
+      xmlModeSwitchedToForeign = true;
+    }
+
+    this.output += `<${elem.name}`;
+    const attribs = this.formatAttributes(elem.attribs);
+
+    if (attribs) {
+      this.output += ` ${attribs}`;
+    }
+
     if (
-      elem.parent &&
-      foreignModeIntegrationPoints.has((elem.parent as Element).name)
+      elem.children.length === 0 &&
+      (this.options.xmlMode
+        ? // In XML mode or foreign mode, and user hasn't explicitly turned off self-closing tags
+          this.options.selfClosingTags !== false
+        : // User explicitly asked for self-closing tags, even in HTML mode
+          this.options.selfClosingTags && singleTag.has(elem.name))
     ) {
-      opts = { ...opts, xmlMode: false };
+      if (!this.options.xmlMode) this.output += " ";
+      this.output += "/>";
+    } else {
+      this.output += ">";
+      if (elem.children.length > 0) {
+        elem.children.forEach((child) => this.renderNode(child));
+      }
+      if (this.options.xmlMode || !singleTag.has(elem.name)) {
+        this.output += `</${elem.name}>`;
+      }
     }
-  }
-  if (!opts.xmlMode && foreignElements.has(elem.name)) {
-    opts = { ...opts, xmlMode: "foreign" };
-  }
-
-  let tag = `<${elem.name}`;
-  const attribs = formatAttributes(elem.attribs, opts);
-
-  if (attribs) {
-    tag += ` ${attribs}`;
-  }
-
-  if (
-    elem.children.length === 0 &&
-    (opts.xmlMode
-      ? // In XML mode or foreign mode, and user hasn't explicitly turned off self-closing tags
-        opts.selfClosingTags !== false
-      : // User explicitly asked for self-closing tags, even in HTML mode
-        opts.selfClosingTags && singleTag.has(elem.name))
-  ) {
-    if (!opts.xmlMode) tag += " ";
-    tag += "/>";
-  } else {
-    tag += ">";
-    if (elem.children.length > 0) {
-      tag += render(elem.children, opts);
-    }
-
-    if (opts.xmlMode || !singleTag.has(elem.name)) {
-      tag += `</${elem.name}>`;
+    if (xmlModeSwitchedToForeign) {
+      // Disabled Handle SVG / MathML in HTML at the end of the matching tag
+      this.options = { ...this.options, xmlMode: false };
     }
   }
 
-  return tag;
-}
-
-function renderDirective(elem: ProcessingInstruction) {
-  return `<${elem.data}>`;
-}
-
-function renderText(elem: Text, opts: DomSerializerOptions) {
-  let data = elem.data || "";
-
-  // If entities weren't decoded, no need to encode them back
-  if (
-    (opts.encodeEntities ?? opts.decodeEntities) !== false &&
-    !(
-      !opts.xmlMode &&
-      elem.parent &&
-      unencodedElements.has((elem.parent as Element).name)
-    )
-  ) {
-    data =
-      opts.xmlMode || opts.encodeEntities !== "utf8"
-        ? encodeXML(data)
-        : escapeText(data);
+  renderDirective(elem: ProcessingInstruction): void {
+    this.output += `<${elem.data}>`;
   }
 
-  return data;
+  renderText(elem: Text): void {
+    let data = elem.data || "";
+
+    // If entities weren't decoded, no need to encode them back
+    if (
+      (this.options.encodeEntities ?? this.options.decodeEntities) !== false &&
+      !(
+        !this.options.xmlMode &&
+        elem.parent &&
+        unencodedElements.has((elem.parent as Element).name)
+      )
+    ) {
+      data =
+        this.options.xmlMode || this.options.encodeEntities !== "utf8"
+          ? encodeXML(data)
+          : escapeText(data);
+    }
+
+    this.output += data;
+  }
+
+  renderCdata(elem: CDATA): void {
+    this.output += `<![CDATA[${(elem.children[0] as Text).data}]]>`;
+  }
+
+  renderComment(elem: Comment): void {
+    this.output += `<!--${elem.data}-->`;
+  }
+
+  replaceQuotes(value: string): string {
+    return value.replace(/"/g, "&quot;");
+  }
+
+  /**
+   * Format attributes
+   */
+  formatAttributes(
+    attributes: Record<string, string | null> | undefined
+  ): string | undefined {
+    if (!attributes) return;
+
+    const encode =
+      (this.options.encodeEntities ?? this.options.decodeEntities) === false
+        ? this.replaceQuotes
+        : this.options.xmlMode || this.options.encodeEntities !== "utf8"
+        ? encodeXML
+        : escapeAttribute;
+
+    return Object.keys(attributes)
+      .map((key) => {
+        const value = attributes[key] ?? "";
+
+        if (this.options.xmlMode === "foreign") {
+          /* Fix up mixed-case attribute names */
+          key = attributeNames.get(key) ?? key;
+        }
+
+        if (!this.options.emptyAttrs && !this.options.xmlMode && value === "") {
+          return key;
+        }
+
+        return `${key}="${encode(value)}"`;
+      })
+      .join(" ");
+  }
 }
 
-function renderCdata(elem: CDATA) {
-  return `<![CDATA[${(elem.children[0] as Text).data}]]>`;
+/**
+ * Renders a DOM node or an array of DOM nodes to a string.
+ *
+ * Can be thought of as the equivalent of the `outerHTML` of the passed node(s).
+ *
+ * @param node Node to be rendered.
+ * @param options Changes serialization behavior
+ */
+export function render(
+  node: AnyNode | ArrayLike<AnyNode>,
+  options: DomSerializerOptions = {}
+): string {
+  return new DomSerializer(options).render(node);
 }
 
-function renderComment(elem: Comment) {
-  return `<!--${elem.data}-->`;
-}
+export default render;
