@@ -1,4 +1,4 @@
-# dom-serializer [![Build Status](https://travis-ci.com/cheeriojs/dom-serializer.svg?branch=master)](https://travis-ci.com/cheeriojs/dom-serializer)
+# dom-serializer [![Node.js CI](https://github.com/cheeriojs/dom-serializer/actions/workflows/nodejs-test.yml/badge.svg)](https://github.com/cheeriojs/dom-serializer/actions/workflows/nodejs-test.yml)
 
 Renders a [domhandler](https://github.com/fb55/domhandler) DOM node or an array of domhandler DOM nodes to a string.
 
