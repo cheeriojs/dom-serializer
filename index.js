@@ -36,6 +36,9 @@ function formatAttrs(attributes, opts) {
   // Loop through the attributes
   for (var key in attributes) {
     value = attributes[key];
+    if (opts.decodeEntities) {
+      value = entities.encodeXML(value);
+    }
     if (output) {
       output += ' ';
     }
@@ -46,12 +49,11 @@ function formatAttrs(attributes, opts) {
     }
     output += key;
     if ((value !== null && value !== '') || opts.xmlMode) {
-      output +=
-        '="' +
-        (opts.decodeEntities
-          ? entities.encodeXML(value)
-          : value.replace(/\"/g, '&quot;')) +
-        '"';
+      var quote = '"';
+      if (value.indexOf('"') > -1) {
+        quote = '\'';
+      }
+      output += '=' + quote + (opts.decodeEntities ? entities.encodeXML(value) : value) + quote;
     }
   }
 
@@ -84,7 +86,7 @@ var singleTag = {
   wbr: true
 };
 
-var render = (module.exports = function(dom, opts) {
+var render = (module.exports = function (dom, opts) {
   if (!Array.isArray(dom) && !dom.cheerio) dom = [dom];
   opts = opts || {};
 
