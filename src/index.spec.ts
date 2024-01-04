@@ -12,7 +12,7 @@ interface CheerioOptions extends DomSerializerOptions {
 function html(
   preset: CheerioOptions,
   str: string,
-  options: CheerioOptions = {}
+  options: CheerioOptions = {},
 ) {
   const opts = { ...defaultOpts, ...preset, ...options };
   const dom = parse(str, opts, true) as Document;
@@ -36,14 +36,14 @@ describe("render DOM parsed with htmlparser2", () => {
     it("should handle double quotes within single quoted attributes properly", () => {
       const str = "<hr class='an \"edge\" case' />";
       expect(htmlFunc(str)).toStrictEqual(
-        '<hr class="an &quot;edge&quot; case">'
+        '<hr class="an &quot;edge&quot; case">',
       );
     });
 
     it("should escape entities to utf8 if requested", () => {
       const str = '<a href="a < b &quot; & c">& " &lt; &gt;</a>';
       expect(
-        html({ _useHtmlParser2: true, encodeEntities: "utf8" }, str)
+        html({ _useHtmlParser2: true, encodeEntities: "utf8" }, str),
       ).toStrictEqual('<a href="a < b &quot; &amp; c">&amp; " &lt; &gt;</a>');
     });
   });
@@ -51,7 +51,7 @@ describe("render DOM parsed with htmlparser2", () => {
   // Run html with default options
   describe(
     "(html, {})",
-    testBody.bind(null, html.bind(null, { _useHtmlParser2: true }))
+    testBody.bind(null, html.bind(null, { _useHtmlParser2: true })),
   );
 
   // Run html with turned off decodeEntities
@@ -59,8 +59,8 @@ describe("render DOM parsed with htmlparser2", () => {
     "(html, {decodeEntities: false})",
     testBody.bind(
       null,
-      html.bind(null, { _useHtmlParser2: true, decodeEntities: false })
-    )
+      html.bind(null, { _useHtmlParser2: true, decodeEntities: false }),
+    ),
   );
 
   describe("(xml)", () => {
@@ -93,7 +93,7 @@ describe("render DOM parsed with htmlparser2", () => {
 
     it("should encode entities in otherwise special tags", () => {
       expect(xml('<script>"<br/>"</script>')).toStrictEqual(
-        "<script>&quot;<br/>&quot;</script>"
+        "<script>&quot;<br/>&quot;</script>",
       );
     });
 
@@ -108,7 +108,7 @@ describe("(xml, {selfClosingTags: false})", () => {
   it("should render childless nodes with an explicit closing tag", () => {
     const str = "<foo /><bar></bar>";
     expect(xml(str, { selfClosingTags: false })).toStrictEqual(
-      "<foo></foo><bar></bar>"
+      "<foo></foo><bar></bar>",
     );
   });
 });
@@ -123,8 +123,8 @@ describe("(html, {selfClosingTags: true})", () => {
           decodeEntities: false,
           selfClosingTags: true,
         },
-        str
-      )
+        str,
+      ),
     ).toStrictEqual(str);
   });
 });
@@ -140,8 +140,8 @@ describe("(html, {selfClosingTags: false})", () => {
           decodeEntities: false,
           selfClosingTags: false,
         },
-        str
-      )
+        str,
+      ),
     ).toStrictEqual(str);
   });
 });
@@ -155,7 +155,7 @@ function testBody(html: (input: string, opts?: CheerioOptions) => string) {
   it("should retain encoded HTML content within attributes", () => {
     const str = '<hr class="cheerio &amp; node = happy parsing" />';
     expect(html(str)).toStrictEqual(
-      '<hr class="cheerio &amp; node = happy parsing">'
+      '<hr class="cheerio &amp; node = happy parsing">',
     );
   });
 
@@ -261,7 +261,7 @@ function testBody(html: (input: string, opts?: CheerioOptions) => string) {
   it("should encode double quotes in attribute", () => {
     const str = `<img src="/" alt='title" onerror="alert(1)" label="x'>`;
     expect(html(str)).toStrictEqual(
-      '<img src="/" alt="title&quot; onerror=&quot;alert(1)&quot; label=&quot;x">'
+      '<img src="/" alt="title&quot; onerror=&quot;alert(1)&quot; label=&quot;x">',
     );
   });
 }
