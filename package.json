@@ -34,7 +34,7 @@
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "cheerio": "^1.0.0-rc.12",
-    "eslint": "^8.57.0",
+    "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",
     "htmlparser2": "^9.1.0",
     "jest": "^27.5.1",
