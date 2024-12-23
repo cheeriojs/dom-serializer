@@ -1,28 +1,28 @@
-import cheerio from "cheerio";
-import render, { DomSerializerOptions } from "./index";
-// TODO: We need to temporarily override the Document type
-import type { Document } from "domhandler";
+import { load, CheerioOptions } from "cheerio";
+import render from "./index";
 
-const { _parse: parse, options: defaultOpts } = cheerio.prototype;
-
-interface CheerioOptions extends DomSerializerOptions {
+interface LoadingOptions extends CheerioOptions {
   _useHtmlParser2?: boolean;
+  decodeEntities?: boolean;
+  encodeEntities?: "utf8";
+  selfClosingTags?: boolean;
+  emptyAttrs?: boolean;
 }
 
 function html(
-  preset: CheerioOptions,
+  preset: LoadingOptions,
   str: string,
-  options: CheerioOptions = {},
+  options: LoadingOptions = {},
 ) {
-  const opts = { ...defaultOpts, ...preset, ...options };
-  const dom = parse(str, opts, true) as Document;
-  return render(dom, opts);
+  const opts = { ...preset, ...options };
+  const $ = load(str, opts, true);
+  return render($._root, opts);
 }
 
-function xml(str: string, options: CheerioOptions = {}) {
-  const opts = { ...defaultOpts, ...options, xmlMode: true };
-  const dom = parse(str, opts, true) as Document;
-  return render(dom, opts);
+function xml(str: string, options: LoadingOptions = {}) {
+  const opts = { ...options, xmlMode: true };
+  const $ = load(str, opts, true);
+  return render($._root, opts);
 }
 
 describe("render DOM parsed with htmlparser2", () => {
@@ -146,7 +146,7 @@ describe("(html, {selfClosingTags: false})", () => {
   });
 });
 
-function testBody(html: (input: string, opts?: CheerioOptions) => string) {
+function testBody(html: (input: string, opts?: LoadingOptions) => string) {
   it("should render <br /> tags without a slash", () => {
     const str = "<br />";
     expect(html(str)).toStrictEqual("<br>");
