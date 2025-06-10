@@ -50,7 +50,7 @@ export interface DomSerializerOptions {
   /**
    * Encode characters that are either reserved in HTML or XML.
    *
-   * If `xmlMode` is `true` or the value not `'utf8'`, characters outside of the utf8 range will be encoded as well.
+   * If `xmlMode` is `true` and the value is not `'utf8'`, characters with more than one UTF-8 byte (i.e. characters outside of the ASCII range) will be encoded as well.
    *
    * @default `decodeEntities`
    */
@@ -250,24 +250,27 @@ function renderDirective(elem: ProcessingInstruction) {
 }
 
 function renderText(elem: Text, opts: DomSerializerOptions) {
-  let data = elem.data || "";
-
   // If entities weren't decoded, no need to encode them back
-  if (
-    (opts.encodeEntities ?? opts.decodeEntities) !== false &&
-    !(
-      !opts.xmlMode &&
-      elem.parent &&
-      unencodedElements.has((elem.parent as Element).name)
-    )
-  ) {
-    data =
-      !!opts.xmlMode || opts.encodeEntities !== "utf8"
-        ? encodeXML(data)
-        : escapeText(data);
+  const isRawContent = opts.decodeEntities === false;
+  const parentIsUnencoded =
+    !opts.xmlMode &&
+    (unencodedElements as Set<string | undefined>).has(
+      (elem.parent as Element | null)?.name,
+    );
+
+  if (isRawContent || parentIsUnencoded) {
+    return elem.data;
   }
 
-  return data;
+  const encodeNonAscii =
+    opts.encodeEntities === "utf8" ||
+    (!opts.xmlMode && opts.encodeEntities !== true);
+
+  if (encodeNonAscii) {
+    return escapeText(elem.data);
+  }
+
+  return encodeXML(elem.data);
 }
 
 function renderCdata(elem: CDATA) {
