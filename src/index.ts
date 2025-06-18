@@ -48,19 +48,28 @@ export interface DomSerializerOptions {
    */
   xmlMode?: boolean | "foreign";
   /**
-   * Encode characters that are either reserved in HTML or XML.
+   * How to handle conversion of characters into entities:
+   * - If `true`, all characters outside of the ASCII range will be converted.
+   * - If `false`, only minimal necessary characters will be converted (assuming character encoding is reliable).
+   * - `"utf8"` is a deprecated alias of `false`.
    *
-   * If `xmlMode` is `true` and the value is not `'utf8'`, characters with more than one UTF-8 byte (i.e. characters outside of the ASCII range) will be encoded as well.
+   * This option is only used when `decodeEntities` is `true` or not set.
    *
-   * @default `decodeEntities`
+   * @default true if xmlMode, false otherwise
    */
   encodeEntities?: boolean | "utf8";
   /**
-   * Option inherited from parsing; will be used as the default value for `encodeEntities`.
+   * Option inherited from parsing, specifying whether entities were decoded.
+   *
+   * If `false`, entities are assumed to be verbatim and will not be converted upon serialization.
    *
    * @default true
    */
   decodeEntities?: boolean;
+}
+
+interface DomSerializerInternalOptions extends DomSerializerOptions {
+  encodeEntities: boolean;
 }
 
 const unencodedElements = new Set([
@@ -83,14 +92,14 @@ function replaceQuotes(value: string): string {
  */
 function formatAttributes(
   attributes: Record<string, string | null> | undefined,
-  opts: DomSerializerOptions,
+  opts: DomSerializerInternalOptions,
 ) {
   if (!attributes) return;
 
   const encode =
-    (opts.encodeEntities ?? opts.decodeEntities) === false
+    opts.decodeEntities === false
       ? replaceQuotes
-      : !!opts.xmlMode || opts.encodeEntities !== "utf8"
+      : opts.encodeEntities
         ? encodeXML
         : escapeAttribute;
 
@@ -149,12 +158,17 @@ export function render(
   node: AnyNode | ArrayLike<AnyNode>,
   options: DomSerializerOptions = {},
 ): string {
+  const opts: DomSerializerInternalOptions = {
+    ...options,
+    encodeEntities: (options.encodeEntities ?? !!options.xmlMode) === true,
+  };
+
   const nodes = "length" in node ? node : [node];
 
   let output = "";
 
   for (let i = 0; i < nodes.length; i++) {
-    output += renderNode(nodes[i], options);
+    output += renderNode(nodes[i], opts);
   }
 
   return output;
@@ -162,7 +176,10 @@ export function render(
 
 export default render;
 
-function renderNode(node: AnyNode, options: DomSerializerOptions): string {
+function renderNode(
+  node: AnyNode,
+  options: DomSerializerInternalOptions,
+): string {
   switch (node.type) {
     case ElementType.Root:
       return render(node.children, options);
@@ -197,7 +214,7 @@ const foreignModeIntegrationPoints = new Set([
 
 const foreignElements = new Set(["svg", "math"]);
 
-function renderTag(elem: Element, opts: DomSerializerOptions) {
+function renderTag(elem: Element, opts: DomSerializerInternalOptions) {
   // Handle SVG / MathML in HTML
   if (opts.xmlMode === "foreign") {
     /* Fix up mixed-case element names */
@@ -249,24 +266,20 @@ function renderDirective(elem: ProcessingInstruction) {
   return `<${elem.data}>`;
 }
 
-function renderText(elem: Text, opts: DomSerializerOptions) {
-  // If entities weren't decoded, no need to encode them back
-  const isRawContent = opts.decodeEntities === false;
-  const parentIsUnencoded =
-    !opts.xmlMode &&
-    (unencodedElements as Set<string | undefined>).has(
-      (elem.parent as Element | null)?.name,
-    );
-
-  if (isRawContent || parentIsUnencoded) {
+function renderText(elem: Text, opts: DomSerializerInternalOptions) {
+  if (
+    // Is raw content (if entities weren't decoded, no need to encode them back)
+    opts.decodeEntities === false ||
+    // Parent is unencoded
+    (!opts.xmlMode &&
+      (unencodedElements as Set<string | undefined>).has(
+        (elem.parent as Element | null)?.name,
+      ))
+  ) {
     return elem.data;
   }
 
-  const encodeNonAscii =
-    opts.encodeEntities === "utf8" ||
-    (!opts.xmlMode && opts.encodeEntities !== true);
-
-  if (encodeNonAscii) {
+  if (!opts.encodeEntities) {
     return escapeText(elem.data);
   }
 

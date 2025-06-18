@@ -1,5 +1,5 @@
 import { load, CheerioOptions } from "cheerio";
-import render from "./index";
+import render, { type DomSerializerOptions } from "./index";
 
 interface LoadingOptions extends CheerioOptions {
   _useHtmlParser2?: boolean;
@@ -267,23 +267,22 @@ function testBody(html: (input: string, opts?: LoadingOptions) => string) {
 }
 
 describe("should respect options for encoding Unicode chars", () => {
-  type EncodeEntitiesOption = boolean | "utf8" | undefined;
   interface TestConfig {
     fn: (str: string, options?: LoadingOptions) => string;
-    shouldEncodeWith: EncodeEntitiesOption[];
-    shouldNotEncodeWith: EncodeEntitiesOption[];
+    shouldEncodeWith: DomSerializerOptions["encodeEntities"][];
+    shouldNotEncodeWith: DomSerializerOptions["encodeEntities"][];
   }
 
   const testConfigs: Record<"xml" | "html", TestConfig> = {
     xml: {
       fn: xml,
-      shouldEncodeWith: [true, false, undefined],
-      shouldNotEncodeWith: ["utf8"],
+      shouldEncodeWith: [true, undefined],
+      shouldNotEncodeWith: ["utf8", false],
     },
     html: {
       fn: html.bind(null, { _useHtmlParser2: true }),
       shouldEncodeWith: [true],
-      shouldNotEncodeWith: ["utf8", undefined, false],
+      shouldNotEncodeWith: ["utf8", false, undefined],
     },
   };
 
