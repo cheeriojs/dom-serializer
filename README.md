@@ -33,13 +33,17 @@ Can be thought of as the equivalent of the `outerHTML` of the passed node(s).
 
 ### `encodeEntities`
 
-• `Optional` **decodeEntities**: _boolean | "utf8"_
+• `Optional` **encodeEntities**: _boolean | "utf8"_
 
-Encode characters that are either reserved in HTML or XML.
+How to handle conversion of characters into entities:
 
-If `xmlMode` is `true` or the value not `'utf8'`, characters outside of the utf8 range will be encoded as well.
+- If `true`, all characters outside of the ASCII range will be converted.
+- If `false`, only minimal necessary characters will be converted (assuming character encoding is reliable).
+- `"utf8"` is a deprecated alias of `false`.
 
-**`default`** `decodeEntities`
+This option is only used when `decodeEntities` is `true` or not set.
+
+**`default`** `true` if `xmlMode`, `false` otherwise
 
 ---
 
@@ -47,7 +51,9 @@ If `xmlMode` is `true` or the value not `'utf8'`, characters outside of the utf8
 
 • `Optional` **decodeEntities**: _boolean_
 
-Option inherited from parsing; will be used as the default value for `encodeEntities`.
+Option inherited from parsing, specifying whether entities were decoded.
+
+If `false`, entities are assumed to be verbatim and will not be converted upon serialization.
 
 **`default`** true
 

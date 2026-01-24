@@ -1,10 +1,10 @@
 import { load, CheerioOptions } from "cheerio";
-import render from "./index";
+import render, { type DomSerializerOptions } from "./index";
 
 interface LoadingOptions extends CheerioOptions {
   _useHtmlParser2?: boolean;
   decodeEntities?: boolean;
-  encodeEntities?: "utf8";
+  encodeEntities?: boolean | "utf8";
   selfClosingTags?: boolean;
   emptyAttrs?: boolean;
 }
@@ -265,3 +265,58 @@ function testBody(html: (input: string, opts?: LoadingOptions) => string) {
     );
   });
 }
+
+describe("should respect options for encoding Unicode chars", () => {
+  interface TestConfig {
+    fn: (str: string, options?: LoadingOptions) => string;
+    shouldEncodeWith: DomSerializerOptions["encodeEntities"][];
+    shouldNotEncodeWith: DomSerializerOptions["encodeEntities"][];
+  }
+
+  const testConfigs: Record<"xml" | "html", TestConfig> = {
+    xml: {
+      fn: xml,
+      shouldEncodeWith: [true, undefined],
+      shouldNotEncodeWith: ["utf8", false],
+    },
+    html: {
+      fn: html.bind(null, { _useHtmlParser2: true }),
+      shouldEncodeWith: [true],
+      shouldNotEncodeWith: ["utf8", false, undefined],
+    },
+  };
+
+  for (const mode of ["xml", "html"] as const) {
+    describe(`(${mode})`, () => {
+      const { fn, shouldEncodeWith, shouldNotEncodeWith } = testConfigs[mode];
+
+      const unencoded = "ÿ💩";
+      const encoded = "&#xff;&#x1f4a9;";
+      const input = `${unencoded} ${encoded}`;
+
+      for (const encodeEntities of shouldEncodeWith) {
+        it(`should encode with ${JSON.stringify({ encodeEntities })}`, () => {
+          const expected = `${encoded} ${encoded}`;
+          expect(fn(input, { encodeEntities })).toStrictEqual(expected);
+        });
+      }
+
+      for (const encodeEntities of shouldNotEncodeWith) {
+        it(`should not encode with ${JSON.stringify({ encodeEntities })}`, () => {
+          const expected = `${unencoded} ${unencoded}`;
+          expect(fn(input, { encodeEntities })).toStrictEqual(expected);
+        });
+      }
+
+      const unchanged = '<x attr="val&quot;">&lt;y&gt;&amp;&lt;/y&gt;</x>';
+      for (const encodeEntities of [
+        ...shouldEncodeWith,
+        ...shouldNotEncodeWith,
+      ]) {
+        it(`should not create or remove elements with ${JSON.stringify({ encodeEntities })}`, () => {
+          expect(fn(unchanged, { encodeEntities })).toStrictEqual(unchanged);
+        });
+      }
+    });
+  }
+});
