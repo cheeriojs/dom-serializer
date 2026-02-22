@@ -20,6 +20,9 @@ import { encodeXML, escapeAttribute, escapeText } from "entities";
  */
 import { attributeNames, elementNames } from "./foreignNames.js";
 
+/**
+ * Options for DOM serialization.
+ */
 export interface DomSerializerOptions {
   /**
    * Print an empty attribute's value.

@@ -1,3 +1,6 @@
+/**
+ * Mixed-case SVG and MathML element names recognized in foreign content.
+ */
 export const elementNames = new Map<string, string>(
   [
     "altGlyph",
@@ -39,6 +42,9 @@ export const elementNames = new Map<string, string>(
     "textPath",
   ].map((value) => [value.toLowerCase(), value]),
 );
+/**
+ * Mixed-case SVG and MathML attribute names recognized in foreign content.
+ */
 export const attributeNames = new Map<string, string>(
   [
     "definitionURL",
