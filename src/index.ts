@@ -4,11 +4,11 @@
 import * as ElementType from "domelementtype";
 import type {
   AnyNode,
+  CDATA,
+  Comment,
   Element,
   ProcessingInstruction,
-  Comment,
   Text,
-  CDATA,
 } from "domhandler";
 import { encodeXML, escapeAttribute, escapeText } from "entities";
 
@@ -18,8 +18,11 @@ import { encodeXML, escapeAttribute, escapeText } from "entities";
  *
  * @see https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inforeign
  */
-import { elementNames, attributeNames } from "./foreignNames.js";
+import { attributeNames, elementNames } from "./foreignNames.js";
 
+/**
+ * Options for DOM serialization.
+ */
 export interface DomSerializerOptions {
   /**
    * Print an empty attribute's value.
@@ -83,14 +86,14 @@ function replaceQuotes(value: string): string {
  */
 function formatAttributes(
   attributes: Record<string, string | null> | undefined,
-  opts: DomSerializerOptions,
+  options: DomSerializerOptions,
 ) {
   if (!attributes) return;
 
   const encode =
-    (opts.encodeEntities ?? opts.decodeEntities) === false
+    (options.encodeEntities ?? options.decodeEntities) === false
       ? replaceQuotes
-      : !!opts.xmlMode || opts.encodeEntities !== "utf8"
+      : !!options.xmlMode || options.encodeEntities !== "utf8"
         ? encodeXML
         : escapeAttribute;
 
@@ -98,12 +101,12 @@ function formatAttributes(
     .map((key) => {
       const value = attributes[key] ?? "";
 
-      if (opts.xmlMode === "foreign") {
+      if (options.xmlMode === "foreign") {
         /* Fix up mixed-case attribute names */
         key = attributeNames.get(key) ?? key;
       }
 
-      if (!opts.emptyAttrs && !opts.xmlMode && value === "") {
+      if (!options.emptyAttrs && !options.xmlMode && value === "") {
         return key;
       }
 
@@ -152,9 +155,10 @@ export function render(
   const nodes = "length" in node ? node : [node];
 
   let output = "";
-
-  for (let i = 0; i < nodes.length; i++) {
-    output += renderNode(nodes[i], options);
+  let index = 0;
+  while (index < nodes.length) {
+    output += renderNode(nodes[index], options);
+    index++;
   }
 
   return output;
@@ -164,22 +168,28 @@ export default render;
 
 function renderNode(node: AnyNode, options: DomSerializerOptions): string {
   switch (node.type) {
-    case ElementType.Root:
+    case ElementType.Root: {
       return render(node.children, options);
+    }
     // @ts-expect-error We don't use `Doctype` yet
     case ElementType.Doctype:
-    case ElementType.Directive:
+    case ElementType.Directive: {
       return renderDirective(node);
-    case ElementType.Comment:
+    }
+    case ElementType.Comment: {
       return renderComment(node);
-    case ElementType.CDATA:
+    }
+    case ElementType.CDATA: {
       return renderCdata(node);
+    }
     case ElementType.Script:
     case ElementType.Style:
-    case ElementType.Tag:
+    case ElementType.Tag: {
       return renderTag(node, options);
-    case ElementType.Text:
+    }
+    case ElementType.Text: {
       return renderText(node, options);
+    }
   }
 }
 
@@ -197,72 +207,72 @@ const foreignModeIntegrationPoints = new Set([
 
 const foreignElements = new Set(["svg", "math"]);
 
-function renderTag(elem: Element, opts: DomSerializerOptions) {
+function renderTag(element: Element, options: DomSerializerOptions) {
   // Handle SVG / MathML in HTML
-  if (opts.xmlMode === "foreign") {
+  if (options.xmlMode === "foreign") {
     /* Fix up mixed-case element names */
-    elem.name = elementNames.get(elem.name) ?? elem.name;
+    element.name = elementNames.get(element.name) ?? element.name;
     /* Exit foreign mode at integration points */
     if (
-      elem.parent &&
-      foreignModeIntegrationPoints.has((elem.parent as Element).name)
+      element.parent &&
+      foreignModeIntegrationPoints.has((element.parent as Element).name)
     ) {
-      opts = { ...opts, xmlMode: false };
+      options = { ...options, xmlMode: false };
     }
   }
-  if (!opts.xmlMode && foreignElements.has(elem.name)) {
-    opts = { ...opts, xmlMode: "foreign" };
+  if (!options.xmlMode && foreignElements.has(element.name)) {
+    options = { ...options, xmlMode: "foreign" };
   }
 
-  let tag = `<${elem.name}`;
-  const attribs = formatAttributes(elem.attribs, opts);
+  let tag = `<${element.name}`;
+  const attribs = formatAttributes(element.attribs, options);
 
   if (attribs) {
     tag += ` ${attribs}`;
   }
 
   if (
-    elem.children.length === 0 &&
-    (opts.xmlMode
+    element.children.length === 0 &&
+    (options.xmlMode
       ? // In XML mode or foreign mode, and user hasn't explicitly turned off self-closing tags
-        opts.selfClosingTags !== false
+        options.selfClosingTags !== false
       : // User explicitly asked for self-closing tags, even in HTML mode
-        opts.selfClosingTags && singleTag.has(elem.name))
+        options.selfClosingTags && singleTag.has(element.name))
   ) {
-    if (!opts.xmlMode) tag += " ";
+    if (!options.xmlMode) tag += " ";
     tag += "/>";
   } else {
     tag += ">";
-    if (elem.children.length > 0) {
-      tag += render(elem.children, opts);
+    if (element.children.length > 0) {
+      tag += render(element.children, options);
     }
 
-    if (!!opts.xmlMode || !singleTag.has(elem.name)) {
-      tag += `</${elem.name}>`;
+    if (!!options.xmlMode || !singleTag.has(element.name)) {
+      tag += `</${element.name}>`;
     }
   }
 
   return tag;
 }
 
-function renderDirective(elem: ProcessingInstruction) {
-  return `<${elem.data}>`;
+function renderDirective(element: ProcessingInstruction) {
+  return `<${element.data}>`;
 }
 
-function renderText(elem: Text, opts: DomSerializerOptions) {
-  let data = elem.data || "";
+function renderText(element: Text, options: DomSerializerOptions) {
+  let data = element.data || "";
 
   // If entities weren't decoded, no need to encode them back
   if (
-    (opts.encodeEntities ?? opts.decodeEntities) !== false &&
+    (options.encodeEntities ?? options.decodeEntities) !== false &&
     !(
-      !opts.xmlMode &&
-      elem.parent &&
-      unencodedElements.has((elem.parent as Element).name)
+      !options.xmlMode &&
+      element.parent &&
+      unencodedElements.has((element.parent as Element).name)
     )
   ) {
     data =
-      !!opts.xmlMode || opts.encodeEntities !== "utf8"
+      !!options.xmlMode || options.encodeEntities !== "utf8"
         ? encodeXML(data)
         : escapeText(data);
   }
@@ -270,10 +280,10 @@ function renderText(elem: Text, opts: DomSerializerOptions) {
   return data;
 }
 
-function renderCdata(elem: CDATA) {
-  return `<![CDATA[${(elem.children[0] as Text).data}]]>`;
+function renderCdata(element: CDATA) {
+  return `<![CDATA[${(element.children[0] as Text).data}]]>`;
 }
 
-function renderComment(elem: Comment) {
-  return `<!--${elem.data}-->`;
+function renderComment(element: Comment) {
+  return `<!--${element.data}-->`;
 }

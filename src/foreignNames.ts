@@ -1,3 +1,6 @@
+/**
+ * Mixed-case SVG and MathML element names recognized in foreign content.
+ */
 export const elementNames = new Map<string, string>(
   [
     "altGlyph",
@@ -37,8 +40,11 @@ export const elementNames = new Map<string, string>(
     "linearGradient",
     "radialGradient",
     "textPath",
-  ].map((val) => [val.toLowerCase(), val]),
+  ].map((value) => [value.toLowerCase(), value]),
 );
+/**
+ * Mixed-case SVG and MathML attribute names recognized in foreign content.
+ */
 export const attributeNames = new Map<string, string>(
   [
     "definitionURL",
@@ -100,5 +106,5 @@ export const attributeNames = new Map<string, string>(
     "xChannelSelector",
     "yChannelSelector",
     "zoomAndPan",
-  ].map((val) => [val.toLowerCase(), val]),
+  ].map((value) => [value.toLowerCase(), value]),
 );
