@@ -4,21 +4,21 @@ import { commonTypeScriptRules } from '@feedic/eslint-config/typescript';
 import tseslint from 'typescript-eslint';
 import { defineConfig } from 'eslint/config';
 import { fileURLToPath } from 'node:url';
-import eslintConfigPrettier from 'eslint-config-prettier';
+import eslintConfigBiome from 'eslint-config-biome';
 
 const gitignorePath = fileURLToPath(new URL('.gitignore', import.meta.url));
 
 export default defineConfig([
   includeIgnoreFile(gitignorePath),
   {
+    linterOptions: {
+      reportUnusedDisableDirectives: 'error',
+    },
+  },
+  {
     ignores: ['eslint.config.{js,cjs,mjs}'],
   },
   ...feedicFlatConfig,
-  {
-    rules: {
-      'unicorn/filename-case': 0,
-    },
-  },
   {
     files: [
         "**/*.ts"
@@ -35,5 +35,5 @@ export default defineConfig([
       ...commonTypeScriptRules,
     },
   },
-  eslintConfigPrettier
+  eslintConfigBiome
 ]);
