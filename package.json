@@ -30,7 +30,7 @@
     "entities": "^7.0.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.4",
+    "@biomejs/biome": "^2.4.5",
     "@eslint/compat": "^2.0.2",
     "@feedic/eslint-config": "^0.2.3",
     "@types/jest": "^30.0.0",
