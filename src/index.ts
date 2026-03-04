@@ -102,7 +102,7 @@ function formatAttributes(
         key = attributeNames.get(key) ?? key;
       }
 
-      if (!options.emptyAttrs && !options.xmlMode && value === "") {
+      if (!(options.emptyAttrs || options.xmlMode) && value === "") {
         return key;
       }
 
