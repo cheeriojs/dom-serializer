@@ -34,7 +34,7 @@
     "@eslint/compat": "^2.0.3",
     "@feedic/eslint-config": "^0.2.3",
     "@types/jest": "^30.0.0",
-    "@types/node": "^25.4.0",
+    "@types/node": "^25.5.0",
     "cheerio": "^1.2.0",
     "eslint": "^10.0.3",
     "eslint-config-biome": "^2.1.3",
