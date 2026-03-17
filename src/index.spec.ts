@@ -1,5 +1,6 @@
 import { type CheerioOptions, load } from "cheerio";
-import render from "./index";
+import { describe, expect, it } from "vitest";
+import render from "./index.js";
 
 interface LoadingOptions extends CheerioOptions {
   _useHtmlParser2?: boolean;
