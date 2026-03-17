@@ -81,7 +81,7 @@ function replaceQuotes(value: string): string {
  * @param options Options that control this operation.
  */
 function formatAttributes(
-  attributes: Record<string, string | null> | undefined,
+  attributes: Record<string, unknown> | undefined,
   options: DomSerializerOptions,
 ) {
   if (!attributes) return;
@@ -95,18 +95,19 @@ function formatAttributes(
 
   return Object.keys(attributes)
     .map((key) => {
-      const value = attributes[key] ?? "";
+      const value = attributes[key];
+      const normalizedValue = value == null ? "" : String(value);
 
       if (options.xmlMode === "foreign") {
         /* Fix up mixed-case attribute names */
         key = attributeNames.get(key) ?? key;
       }
 
-      if (!(options.emptyAttrs || options.xmlMode) && value === "") {
+      if (!(options.emptyAttrs || options.xmlMode) && normalizedValue === "") {
         return key;
       }
 
-      return `${key}="${encode(value)}"`;
+      return `${key}="${encode(normalizedValue)}"`;
     })
     .join(" ");
 }

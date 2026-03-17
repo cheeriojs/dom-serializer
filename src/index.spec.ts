@@ -47,6 +47,17 @@ describe("render DOM parsed with htmlparser2", () => {
         html({ _useHtmlParser2: true, encodeEntities: "utf8" }, markup),
       ).toStrictEqual('<a href="a < b &quot; &amp; c">&amp; " &lt; &gt;</a>');
     });
+
+    it("should stringify non-string attribute values before escaping", () => {
+      const $ = load("<div></div>", { _useHtmlParser2: true }, true);
+      const div = $("div")[0];
+
+      (div.attribs as Record<string, unknown>).width = 42;
+
+      expect(render($._root, { _useHtmlParser2: true })).toStrictEqual(
+        '<div width="42"></div>',
+      );
+    });
   });
 
   // Run html with default options
@@ -101,6 +112,18 @@ describe("render DOM parsed with htmlparser2", () => {
     it("should not encode entities if disabled", () => {
       const markup = '<script>"<br/>"</script>';
       expect(xml(markup, { decodeEntities: false })).toStrictEqual(markup);
+    });
+
+    it("should stringify non-string SVG attribute values before escaping", () => {
+      const $ = load("<svg><rect/></svg>", { xmlMode: true }, true);
+      const rect = $("rect")[0];
+
+      (rect.attribs as Record<string, unknown>).width = 42;
+      (rect.attribs as Record<string, unknown>).height = 24;
+
+      expect(render($._root, { xmlMode: true })).toStrictEqual(
+        '<svg><rect width="42" height="24"/></svg>',
+      );
     });
   });
 });
