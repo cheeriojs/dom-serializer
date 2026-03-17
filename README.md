@@ -37,7 +37,7 @@ Can be thought of as the equivalent of the `outerHTML` of the passed node(s).
 
 Encode characters that are either reserved in HTML or XML.
 
-If `xmlMode` is `true` or the value not `'utf8'`, characters outside of the utf8 range will be encoded as well.
+If `xmlMode` is `true` or the value not `'utf8'`, characters outside of the ASCII range will be encoded as well.
 
 **`default`** `decodeEntities`
 
