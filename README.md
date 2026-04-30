@@ -33,11 +33,13 @@ Can be thought of as the equivalent of the `outerHTML` of the passed node(s).
 
 ### `encodeEntities`
 
-• `Optional` **decodeEntities**: _boolean | "utf8"_
+• `Optional` **encodeEntities**: _boolean | "utf8"_
 
-Encode characters that are either reserved in HTML or XML.
+Encode characters reserved in HTML or XML in text and attribute values.
 
-If `xmlMode` is `true` or the value not `'utf8'`, characters outside of the ASCII range will be encoded as well.
+If `xmlMode` is `true` or the value is not `'utf8'`, characters outside of the ASCII range will be encoded as well.
+
+> **Security:** Setting this to `false` disables encoding of `<`, `>`, and `&` in text and attribute values. This is intended for the round-trip case where the DOM was parsed with `decodeEntities: false`, so markup characters only exist as entity references. If the DOM contains raw markup characters (e.g., from a default-decoded parse, or from programmatic manipulation), they will be emitted literally — do not use this option with untrusted input unless you have validated the DOM yourself.
 
 **`default`** `decodeEntities`
 
@@ -47,7 +49,7 @@ If `xmlMode` is `true` or the value not `'utf8'`, characters outside of the ASCI
 
 • `Optional` **decodeEntities**: _boolean_
 
-Option inherited from parsing; will be used as the default value for `encodeEntities`.
+Default for `encodeEntities`. Named to match the parser option of the same name so a single options object can be threaded through parse and serialize. Despite the name, on the serializer this option controls *encoding* — setting it to `false` carries the same security caveat as `encodeEntities: false`.
 
 **`default`** true
 
