@@ -195,7 +195,7 @@ function renderNode(
           unencodedElements.has((element.parent as Element).name)
         )
       ) {
-        // `!!xmlMode` coerces "foreign" → true
+        // `xmlMode: "foreign"` is truthy
         return xmlMode || options.encodeEntities !== "utf8"
           ? encodeXML(data)
           : escapeText(data);
