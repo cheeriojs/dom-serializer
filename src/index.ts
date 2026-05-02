@@ -300,6 +300,8 @@ function formatAttributes(
   let result = "";
 
   for (const key in attributes) {
+    if (!Object.hasOwn(attributes, key)) continue;
+
     const value = attributes[key];
     const k = isForeign ? (attributeNames.get(key) ?? key) : key;
 
