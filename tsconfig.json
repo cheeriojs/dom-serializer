@@ -25,6 +25,7 @@
   "include": ["src"],
   "exclude": [
     "**/*.spec.ts",
+    "**/*.bench.ts",
     "**/__fixtures__/*",
     "**/__tests__/*",
     "**/__snapshots__/*"
