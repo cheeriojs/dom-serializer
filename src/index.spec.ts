@@ -49,14 +49,18 @@ describe("render DOM parsed with htmlparser2", () => {
     });
 
     it("should stringify non-string attribute values before escaping", () => {
-      const $ = load("<div></div>", { _useHtmlParser2: true } as CheerioOptions, true);
+      const $ = load(
+        "<div></div>",
+        { _useHtmlParser2: true } as CheerioOptions,
+        true,
+      );
       const div = $("div")[0];
 
       (div.attribs as Record<string, unknown>).width = 42;
 
-      expect(render($._root, { _useHtmlParser2: true } as LoadingOptions)).toStrictEqual(
-        '<div width="42"></div>',
-      );
+      expect(
+        render($._root, { _useHtmlParser2: true } as LoadingOptions),
+      ).toStrictEqual('<div width="42"></div>');
     });
   });
 

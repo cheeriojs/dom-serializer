@@ -89,7 +89,7 @@ function formatAttributes(
   const encode =
     (options.encodeEntities ?? options.decodeEntities) === false
       ? replaceQuotes
-      : !!options.xmlMode || options.encodeEntities !== "utf8"
+      : options.xmlMode || options.encodeEntities !== "utf8"
         ? encodeXML
         : escapeAttribute;
 
@@ -243,7 +243,7 @@ function renderTag(element: Element, options: DomSerializerOptions) {
       tag += render(element.children, options);
     }
 
-    if (!!options.xmlMode || !singleTag.has(element.name)) {
+    if (options.xmlMode || !singleTag.has(element.name)) {
       tag += `</${element.name}>`;
     }
   }
@@ -268,7 +268,7 @@ function renderText(element: Text, options: DomSerializerOptions) {
     )
   ) {
     data =
-      !!options.xmlMode || options.encodeEntities !== "utf8"
+      options.xmlMode || options.encodeEntities !== "utf8"
         ? encodeXML(data)
         : escapeText(data);
   }
