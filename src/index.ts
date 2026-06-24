@@ -170,6 +170,7 @@ function renderNode(
     }
 
     case ElementType.CDATA: {
+      // eslint-disable-next-line unicorn/better-dom-traversing -- a CDATA node's child is a text node, not an element; `.firstElementChild` would return the wrong node (false positive)
       return `<![CDATA[${((node as CDATA).children[0] as Text).data}]]>`;
     }
 
@@ -196,9 +197,9 @@ function renderNode(
         )
       ) {
         // `xmlMode: "foreign"` is truthy
-        return xmlMode || options.encodeEntities !== "utf8"
-          ? encodeXML(data)
-          : escapeText(data);
+        return (
+          xmlMode || options.encodeEntities !== "utf8" ? encodeXML : escapeText
+        )(data);
       }
 
       return data;
@@ -295,7 +296,7 @@ function formatAttributes(
         : escapeAttribute;
 
   const isForeign = xmlMode === "foreign";
-  const showEmpty = !!(options.emptyAttrs ?? xmlMode);
+  const isShowEmpty = !!(options.emptyAttrs ?? xmlMode);
 
   let result = "";
 
@@ -306,7 +307,7 @@ function formatAttributes(
     const k = isForeign ? (attributeNames.get(key) ?? key) : key;
 
     result +=
-      !showEmpty && (value == null || value === "")
+      !isShowEmpty && (value == null || value === "")
         ? ` ${k}`
         : ` ${k}="${encode(value == null ? "" : String(value))}"`;
   }
