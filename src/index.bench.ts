@@ -3,8 +3,12 @@ import { bench, describe } from "vitest";
 import type { DomSerializerOptions } from "./index.js";
 import render from "./index.js";
 
-function buildDom(markup: string, xmlMode?: boolean) {
-  const $ = load(markup, { _useHtmlParser2: true, xmlMode } as never, true);
+function buildDom(markup: string, isXmlMode?: boolean) {
+  const $ = load(
+    markup,
+    { _useHtmlParser2: true, xmlMode: isXmlMode } as never,
+    true,
+  );
   return $._root;
 }
 
@@ -61,7 +65,8 @@ const svgDom = buildDom(svgMarkup);
 const textHeavyMarkup = Array.from(
   { length: 200 },
   (_, index) =>
-    `<p>Text with special chars: &amp; &lt; &gt; &quot; and unicode: \u00E9\u00E8\u00EA item ${index}</p>`,
+    // eslint-disable-next-line unicorn/no-incorrect-template-string-interpolation -- \u{E9}\u{E8}\u{EA} are valid Unicode escapes, not template interpolations (false positive)
+    `<p>Text with special chars: &amp; &lt; &gt; &quot; and unicode: \u{E9}\u{E8}\u{EA} item ${index}</p>`,
 ).join("");
 const textHeavy = buildDom(textHeavyMarkup);
 
