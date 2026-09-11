@@ -31,7 +31,7 @@
   "dependencies": {
     "domelementtype": "^3.0.0",
     "domhandler": "^6.0.0",
-    "entities": "^8.0.0"
+    "entities": "^8.1.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.12",
