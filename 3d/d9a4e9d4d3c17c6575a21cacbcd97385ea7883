@@ -1,0 +1,39 @@
+src/index.ts
+  s_6bbbbbc7cea8e7::t_c8f94597eb5353 203-211
+  s_6bbbbbc7cea8e7::t_43a1383cdb4f8c 255
+  s_b90afac2630986::t_de2099be0babdd 122,129-137,140,142,145,147,150-202,212-250
+src/index.spec.ts
+  s_ce626ece8b2d14::t_66954101549881 2,303-333
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3dd9a4e9d4d3c17c6575a21cacbcd97385ea7883",
+  "prompts": {},
+  "sessions": {
+    "s_6bbbbbc7cea8e7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "477ae3a9-56cd-4535-bf0f-8d24ed1686d9",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": null
+    },
+    "s_b90afac2630986": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a103bb-1829-7fd2-97d3-1c9b180b9982",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Felix Boehm <188768+fb55@users.noreply.github.com>"
+    },
+    "s_ce626ece8b2d14": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a103bb-2fb0-7c91-b7a2-03957b2f8d84",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Felix Boehm <188768+fb55@users.noreply.github.com>"
+    }
+  }
+}
