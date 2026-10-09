@@ -49,6 +49,7 @@
     "node": ">=20.19.0"
   },
   "scripts": {
+    "benchmark": "vitest bench --run",
     "build": "tsc",
     "format": "npm run format:es && npm run format:biome",
     "format:biome": "biome check --write .",

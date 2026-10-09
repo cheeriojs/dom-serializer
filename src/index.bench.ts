@@ -1,5 +1,5 @@
 import { load } from "cheerio";
-import { bench, describe } from "vitest";
+import { describe, test } from "vitest";
 import type { DomSerializerOptions } from "./index.js";
 import render from "./index.js";
 
@@ -122,81 +122,111 @@ const utf8Options: DomSerializerOptions = { encodeEntities: "utf8" };
 const selfClosingOptions: DomSerializerOptions = { selfClosingTags: true };
 
 describe("Simple HTML", () => {
-  bench("render simple tag", () => {
-    render(simpleHtml, defaultOptions);
+  test("render simple tag", async ({ bench }) => {
+    await bench("render simple tag", () => {
+      render(simpleHtml, defaultOptions);
+    }).run();
   });
 });
 
 describe("Many siblings (500 elements)", () => {
-  bench("render many siblings", () => {
-    render(manySiblings, defaultOptions);
+  test("render many siblings", async ({ bench }) => {
+    await bench("render many siblings", () => {
+      render(manySiblings, defaultOptions);
+    }).run();
   });
 });
 
 describe("Deeply nested (200 levels)", () => {
-  bench("render deeply nested", () => {
-    render(deeplyNested, defaultOptions);
+  test("render deeply nested", async ({ bench }) => {
+    await bench("render deeply nested", () => {
+      render(deeplyNested, defaultOptions);
+    }).run();
   });
 });
 
 describe("Attribute-heavy (50 elems × 30 attrs)", () => {
-  bench("render attribute-heavy", () => {
-    render(attributeHeavy, defaultOptions);
+  test("render attribute-heavy", async ({ bench }) => {
+    await bench("render attribute-heavy", () => {
+      render(attributeHeavy, defaultOptions);
+    }).run();
   });
 });
 
 describe("SVG foreign mode", () => {
-  bench("render SVG (default)", () => {
-    render(svgDom, defaultOptions);
+  test("render SVG (default)", async ({ bench }) => {
+    await bench("render SVG (default)", () => {
+      render(svgDom, defaultOptions);
+    }).run();
   });
 
-  bench("render SVG (foreign)", () => {
-    render(svgDom, foreignOptions);
+  test("render SVG (foreign)", async ({ bench }) => {
+    await bench("render SVG (foreign)", () => {
+      render(svgDom, foreignOptions);
+    }).run();
   });
 });
 
 describe("Text-heavy with entities (200 paragraphs)", () => {
-  bench("render text-heavy (default)", () => {
-    render(textHeavy, defaultOptions);
+  test("render text-heavy (default)", async ({ bench }) => {
+    await bench("render text-heavy (default)", () => {
+      render(textHeavy, defaultOptions);
+    }).run();
   });
 
-  bench("render text-heavy (utf8)", () => {
-    render(textHeavy, utf8Options);
+  test("render text-heavy (utf8)", async ({ bench }) => {
+    await bench("render text-heavy (utf8)", () => {
+      render(textHeavy, utf8Options);
+    }).run();
   });
 });
 
 describe("Realistic page", () => {
-  bench("render realistic page (default)", () => {
-    render(realisticPage, defaultOptions);
+  test("render realistic page (default)", async ({ bench }) => {
+    await bench("render realistic page (default)", () => {
+      render(realisticPage, defaultOptions);
+    }).run();
   });
 
-  bench("render realistic page (utf8)", () => {
-    render(realisticPage, utf8Options);
+  test("render realistic page (utf8)", async ({ bench }) => {
+    await bench("render realistic page (utf8)", () => {
+      render(realisticPage, utf8Options);
+    }).run();
   });
 
-  bench("render realistic page (self-closing)", () => {
-    render(realisticPage, selfClosingOptions);
+  test("render realistic page (self-closing)", async ({ bench }) => {
+    await bench("render realistic page (self-closing)", () => {
+      render(realisticPage, selfClosingOptions);
+    }).run();
   });
 });
 
 describe("XML mode (100 elements)", () => {
-  bench("render XML", () => {
-    render(xmlDom, xmlOptions);
+  test("render XML", async ({ bench }) => {
+    await bench("render XML", () => {
+      render(xmlDom, xmlOptions);
+    }).run();
   });
 });
 
 describe("Comments (100 comments + elements)", () => {
-  bench("render comments", () => {
-    render(commentsDom, defaultOptions);
+  test("render comments", async ({ bench }) => {
+    await bench("render comments", () => {
+      render(commentsDom, defaultOptions);
+    }).run();
   });
 });
 
 describe("Self-closing tags (1200 void elements)", () => {
-  bench("render self-closing tags", () => {
-    render(selfClosingDom, defaultOptions);
+  test("render self-closing tags", async ({ bench }) => {
+    await bench("render self-closing tags", () => {
+      render(selfClosingDom, defaultOptions);
+    }).run();
   });
 
-  bench("render self-closing (with slash)", () => {
-    render(selfClosingDom, selfClosingOptions);
+  test("render self-closing (with slash)", async ({ bench }) => {
+    await bench("render self-closing (with slash)", () => {
+      render(selfClosingDom, selfClosingOptions);
+    }).run();
   });
 });
