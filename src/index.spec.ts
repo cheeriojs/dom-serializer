@@ -1,4 +1,5 @@
 import { type CheerioOptions, load } from "cheerio";
+import { Document, Text } from "domhandler";
 import { describe, expect, it } from "vitest";
 import render from "./index.js";
 
@@ -299,3 +300,33 @@ function testBody(html: (input: string, options?: LoadingOptions) => string) {
     );
   });
 }
+
+describe("deeply nested DOMs", () => {
+  it.each([
+    ["HTML", "<div>", "</div>", false, 12_000],
+    ["HTML with siblings", "<div>", "</div><br>", false, 12_000],
+    ["XML with siblings", "<node>", "</node><empty/>", true, 12_000],
+    [
+      "foreign content with siblings",
+      "<section><svg><foreignObject><div>",
+      "</div><br></foreignObject><path/></svg><hr></section>",
+      false,
+      3000,
+    ],
+  ] as const)("should serialize deep %s", (_, open, close, xmlMode, depth) => {
+    const markup = `${open.repeat(depth)}a &amp; b${close.repeat(depth)}`;
+    const $ = load(markup, {
+      _useHtmlParser2: true,
+      xmlMode,
+    } as CheerioOptions);
+    expect(render($._root, { xmlMode })).toBe(markup);
+  });
+
+  it("should serialize deeply nested document nodes", () => {
+    let root = new Document([new Text("text")]);
+    for (let depth = 0; depth < 100_000; depth++) {
+      root = new Document([root]);
+    }
+    expect(render(root)).toBe("text");
+  });
+});

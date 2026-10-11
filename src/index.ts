@@ -110,7 +110,18 @@ export function render(
   node: AnyNode | ArrayLike<AnyNode>,
   options: DomSerializerOptions = {},
 ): string {
-  const nodes = "length" in node ? node : [node];
+  let nodes: ArrayLike<AnyNode> = "length" in node ? node : [node];
+
+  /*
+   * A lone top-level root contributes only its children, so unwrap it and let
+   * the common `$.html()` path skip a frame.
+   */
+  const first = nodes.length === 1 ? nodes[0] : undefined;
+  if (first?.type === ElementType.Root) {
+    nodes = first.children;
+  }
+
+  if (nodes.length === 0) return "";
 
   /*
    * `xmlMode` is threaded as a separate argument through the internal
@@ -119,48 +130,144 @@ export function render(
    */
   const xmlMode = options.xmlMode ?? false;
 
-  let output = "";
-  // eslint-disable-next-line unicorn/no-for-loop
-  for (let index = 0; index < nodes.length; index++) {
-    output += renderNode(nodes[index], options, xmlMode);
-  }
-
-  return output;
+  return renderChildren(nodes, options, xmlMode);
 }
 
 export default render;
 
 // ── Internal rendering ───────────────────────────────────────────────
 
+/** A list of siblings that is left to finish once a child's subtree is done. */
+interface Frame {
+  nodes: ArrayLike<AnyNode>;
+  index: number;
+  mode: boolean | "foreign";
+  close: string;
+  parent: Frame | undefined;
+}
+
 /**
  * Render an array of child nodes (skips the single-node wrapping in `render`).
- * @param children The child nodes to render.
+ * @param nodes The child nodes to render.
  * @param options The serialization options.
- * @param xmlMode The XML mode to use.
+ * @param mode The XML mode to use.
  */
 function renderChildren(
-  children: ArrayLike<AnyNode>,
+  nodes: ArrayLike<AnyNode>,
   options: DomSerializerOptions,
-  xmlMode: boolean | "foreign",
+  mode: boolean | "foreign",
 ): string {
   let output = "";
-  // eslint-disable-next-line unicorn/no-for-loop
-  for (let index = 0; index < children.length; index++) {
-    output += renderNode(children[index], options, xmlMode);
+  let index = 0;
+  // Closing tag of the element that `nodes` are the children of
+  let close = "";
+
+  // Unfinished sibling lists are kept on this stack.
+  let stack: Frame | undefined;
+
+  for (;;) {
+    siblings: while (index < nodes.length) {
+      const node = nodes[index++];
+
+      switch (node.type) {
+        case ElementType.Tag:
+        case ElementType.Script:
+        case ElementType.Style: {
+          const element = node;
+          let xmlMode = mode;
+
+          if (xmlMode === "foreign") {
+            // Correct lowercase element names back to their canonical mixed-case form
+            element.name = elementNames.get(element.name) ?? element.name;
+
+            // Integration points exit foreign mode: their children are HTML
+            if (
+              element.parent &&
+              foreignModeIntegrationPoints.has((element.parent as Element).name)
+            ) {
+              xmlMode = false;
+            }
+          }
+
+          if (!xmlMode && foreignElements.has(element.name)) {
+            xmlMode = "foreign";
+          }
+
+          const { name, children } = element;
+
+          // Cache the void-element check — used for both self-closing and closing-tag logic
+          const isVoid = !xmlMode && voidElements.has(name);
+
+          let tag = `<${name}${formatAttributes(element.attribs, options, xmlMode)}`;
+
+          if (
+            children.length === 0 &&
+            (xmlMode
+              ? options.selfClosingTags !== false
+              : options.selfClosingTags && isVoid)
+          ) {
+            // XML: `<br/>`, HTML: `<br />`
+            tag += xmlMode ? "/>" : " />";
+          } else {
+            tag += ">";
+
+            if (
+              children.length === 1 &&
+              children[0].type === ElementType.Text
+            ) {
+              // Common `<tag>text</tag>` case: a lone text child cannot descend, so render it directly without a frame.
+              tag += renderText(children[0], options, xmlMode);
+              if (!isVoid) tag += `</${name}>`;
+            } else if (children.length > 0) {
+              const end = isVoid ? "" : `</${name}>`;
+              if (index < nodes.length) {
+                stack = { nodes, index, mode, close, parent: stack };
+                close = end;
+              } else {
+                // Last sibling: nothing to come back to but the closing tags
+                close = end + close;
+              }
+              nodes = children;
+              index = 0;
+              mode = xmlMode;
+            } else if (!isVoid) {
+              tag += `</${name}>`;
+            }
+          }
+
+          output += tag;
+          continue siblings;
+        }
+
+        case ElementType.Root: {
+          if (index < nodes.length) {
+            stack = { nodes, index, mode, close, parent: stack };
+            close = "";
+          }
+          nodes = node.children;
+          index = 0;
+          continue siblings;
+        }
+
+        default: {
+          output += renderNode(node, options, mode);
+        }
+      }
+    }
+
+    output += close;
+
+    if (!stack) return output;
+    ({ nodes, index, mode, close, parent: stack } = stack);
   }
-  return output;
 }
 
 function renderNode(
-  node: AnyNode,
+  node: CDATA | Comment | ProcessingInstruction | Text,
   options: DomSerializerOptions,
   xmlMode: boolean | "foreign",
 ): string {
   switch (node.type) {
-    case ElementType.Root: {
-      return renderChildren(node.children, options, xmlMode);
-    }
-
     case ElementType.Directive: {
       return `<${(node as ProcessingInstruction).data}>`;
     }
@@ -174,89 +281,38 @@ function renderNode(
       return `<![CDATA[${((node as CDATA).children[0] as Text).data}]]>`;
     }
 
-    case ElementType.Script:
-    case ElementType.Style:
-    case ElementType.Tag: {
-      return renderTag(node as Element, options, xmlMode);
-    }
-
     case ElementType.Text: {
-      const element = node as Text;
-      const data = element.data || "";
-
-      /*
-       * Skip encoding when entities weren't decoded on input, or when
-       * inside a raw-text element (script, style, etc.) in HTML mode.
-       */
-      if (
-        (options.encodeEntities ?? options.decodeEntities) !== false &&
-        !(
-          !xmlMode &&
-          element.parent &&
-          unencodedElements.has((element.parent as Element).name)
-        )
-      ) {
-        // `xmlMode: "foreign"` is truthy
-        return (
-          xmlMode || options.encodeEntities !== "utf8" ? encodeXML : escapeText
-        )(data);
-      }
-
-      return data;
+      return renderText(node, options, xmlMode);
     }
   }
 }
 
-function renderTag(
-  element: Element,
+function renderText(
+  element: Text,
   options: DomSerializerOptions,
   xmlMode: boolean | "foreign",
-) {
-  if (xmlMode === "foreign") {
-    // Correct lowercase element names back to their canonical mixed-case form
-    element.name = elementNames.get(element.name) ?? element.name;
+): string {
+  const data = element.data || "";
 
-    // Integration points exit foreign mode: their children are HTML
-    if (
-      element.parent &&
-      foreignModeIntegrationPoints.has((element.parent as Element).name)
-    ) {
-      xmlMode = false;
-    }
-  }
-
-  if (!xmlMode && foreignElements.has(element.name)) {
-    xmlMode = "foreign";
-  }
-
-  const { name, children } = element;
-
-  // Cache the void-element check — used for both self-closing and closing-tag logic
-  const isVoid = !xmlMode && voidElements.has(name);
-
-  let tag = `<${name}${formatAttributes(element.attribs, options, xmlMode)}`;
-
+  /*
+   * Skip encoding when entities weren't decoded on input, or when
+   * inside a raw-text element (script, style, etc.) in HTML mode.
+   */
   if (
-    children.length === 0 &&
-    (xmlMode
-      ? options.selfClosingTags !== false
-      : options.selfClosingTags && isVoid)
+    (options.encodeEntities ?? options.decodeEntities) !== false &&
+    !(
+      !xmlMode &&
+      element.parent &&
+      unencodedElements.has((element.parent as Element).name)
+    )
   ) {
-    // XML: `<br/>`, HTML: `<br />`
-    tag += xmlMode ? "/>" : " />";
-  } else {
-    tag += ">";
-
-    if (children.length > 0) {
-      tag += renderChildren(children, options, xmlMode);
-    }
-
-    if (!isVoid) {
-      tag += `</${name}>`;
-    }
+    // `xmlMode: "foreign"` is truthy
+    return (
+      xmlMode || options.encodeEntities !== "utf8" ? encodeXML : escapeText
+    )(data);
   }
 
-  return tag;
+  return data;
 }
 
 // ── Attribute formatting ─────────────────────────────────────────────
