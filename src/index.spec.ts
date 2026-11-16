@@ -49,6 +49,39 @@ describe("render DOM parsed with htmlparser2", () => {
       ).toStrictEqual('<a href="a < b &quot; &amp; c">&amp; " &lt; &gt;</a>');
     });
 
+    it.each([
+      [
+        '<svg aria-label="café"><text>café&nbsp;&lt;</text></svg>',
+        '<svg aria-label="café"><text>café&nbsp;&lt;</text></svg>',
+      ],
+      [
+        "<math><mi>日本 &amp; é</mi><mo>+</mo></math>",
+        "<math><mi>日本 &amp; é</mi><mo>+</mo></math>",
+      ],
+      [
+        '<svg><foreignObject><p title="é">é</p></foreignObject><desc>é</desc></svg>',
+        '<svg><foreignObject><p title="é">é</p></foreignObject><desc>é</desc></svg>',
+      ],
+    ])(
+      "should keep utf8 escaping inside foreign content: %s",
+      (markup, expected) => {
+        expect(
+          html({ _useHtmlParser2: true, encodeEntities: "utf8" }, markup),
+        ).toStrictEqual(expected);
+      },
+    );
+
+    it("should still fully encode foreign content when xmlMode is set", () => {
+      const $ = load(
+        '<svg aria-label="é">é</svg>',
+        { _useHtmlParser2: true } as CheerioOptions,
+        true,
+      );
+      expect(
+        render($._root, { encodeEntities: "utf8", xmlMode: "foreign" }),
+      ).toStrictEqual('<svg aria-label="&#xe9;">&#xe9;</svg>');
+    });
+
     it("should stringify non-string attribute values before escaping", () => {
       const $ = load(
         "<div></div>",

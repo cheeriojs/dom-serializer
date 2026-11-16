@@ -306,9 +306,15 @@ function renderText(
       unencodedElements.has((element.parent as Element).name)
     )
   ) {
-    // `xmlMode: "foreign"` is truthy
+    /*
+     * Use the caller's `xmlMode` here, not the per-element one: SVG and
+     * MathML inside an HTML document are still read by an HTML parser, so
+     * `encodeEntities: "utf8"` applies to them too.
+     */
     return (
-      xmlMode || options.encodeEntities !== "utf8" ? encodeXML : escapeText
+      options.xmlMode || options.encodeEntities !== "utf8"
+        ? encodeXML
+        : escapeText
     )(data);
   }
 
@@ -342,12 +348,13 @@ function formatAttributes(
    * Pick the right encoder:
    *  - Encoding disabled → only escape double-quotes (for valid attributes)
    *  - XML / non-utf8    → full numeric entity encoding (encodeXML)
-   *  - HTML + utf8       → minimal escaping (escapeAttribute)
+   *  - HTML + utf8       → minimal escaping (escapeAttribute), also for
+   *                        SVG/MathML inside HTML (see `renderText`)
    */
   const encode =
     (options.encodeEntities ?? options.decodeEntities) === false
       ? replaceQuotes
-      : xmlMode || options.encodeEntities !== "utf8"
+      : options.xmlMode || options.encodeEntities !== "utf8"
         ? encodeXML
         : escapeAttribute;
 
