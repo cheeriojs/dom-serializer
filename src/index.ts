@@ -165,7 +165,7 @@ function renderChildren(
   // Unfinished sibling lists are kept on this stack.
   let stack: Frame | undefined;
 
-  for (;;) {
+  while (true) {
     siblings: while (index < nodes.length) {
       const node = nodes[index++];
 
