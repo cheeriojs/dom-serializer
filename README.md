@@ -49,7 +49,7 @@ If `xmlMode` is `true` or the value is not `'utf8'`, characters outside of the A
 
 • `Optional` **decodeEntities**: _boolean_
 
-Default for `encodeEntities`. Named to match the parser option of the same name so a single options object can be threaded through parse and serialize. Despite the name, on the serializer this option controls *encoding* — setting it to `false` carries the same security caveat as `encodeEntities: false`.
+Default for `encodeEntities`. Named to match the parser option of the same name so a single options object can be threaded through parse and serialize. Despite the name, on the serializer this option controls _encoding_ — setting it to `false` carries the same security caveat as `encodeEntities: false`.
 
 **`default`** true
 
