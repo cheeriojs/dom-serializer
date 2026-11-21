@@ -1,0 +1,19 @@
+SECURITY.md
+  s_bbe9d84c77a48b::t_11b89d71787c15 35-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "97767c132fd52518e83cc056a8c260e79f4950ee",
+  "prompts": {},
+  "sessions": {
+    "s_bbe9d84c77a48b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5aab9ac2-cc21-4e88-856a-891435844a9d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Felix Boehm <188768+fb55@users.noreply.github.com>"
+    }
+  }
+}
