@@ -46,7 +46,9 @@ describe("render DOM parsed with htmlparser2", () => {
       const markup = '<a href="a < b &quot; & c">& " &lt; &gt;</a>';
       expect(
         html({ _useHtmlParser2: true, encodeEntities: "utf8" }, markup),
-      ).toStrictEqual('<a href="a < b &quot; &amp; c">&amp; " &lt; &gt;</a>');
+      ).toStrictEqual(
+        '<a href="a &lt; b &quot; &amp; c">&amp; " &lt; &gt;</a>',
+      );
     });
 
     it("should stringify non-string attribute values before escaping", () => {
